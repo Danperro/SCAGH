@@ -12,7 +12,7 @@ return new class extends Migration {
 
             // FK Carrera (catálogo)
             $table->unsignedBigInteger('carrera_id');
-            $table->foreign('carrera_id')->references('id')->on('catalogo');
+            $table->foreign('carrera_id')->references('id')->on('carrera');
 
             // FK Ciclo (catálogo)
             $table->unsignedBigInteger('ciclo_id');

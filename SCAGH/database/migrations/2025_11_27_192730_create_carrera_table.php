@@ -11,17 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('catalogo', function (Blueprint $table) {
+        Schema::create('carrera', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre', 100);
+            // FK Ciclo (facultad)
+            $table->unsignedBigInteger('facultad_id');
+            $table->foreign('facultad_id')->references('id')->on('catalogo');
+            
+            $table->string('nombre', 50)->unique();
             $table->boolean('estado')->default(true);
 
-            $table->unsignedBigInteger('padre_id')->nullable();
-            $table->foreign('padre_id')->references('id')->on('catalogo');
-
-             $table->dateTime('fecha_cr')->nullable();
+            // Auditoría
+            $table->dateTime('fecha_cr')->nullable();
             $table->unsignedBigInteger('usuario_cr')->nullable();
-
             $table->dateTime('fecha_md')->nullable();
             $table->unsignedBigInteger('usuario_md')->nullable();
 
@@ -34,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('catalogo');
+        Schema::dropIfExists('carrera');
     }
 };

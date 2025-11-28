@@ -10,7 +10,6 @@ class Catalogo extends Model
     protected $table = 'catalogo';
 
     protected $fillable = [
-        'grupo',
         'nombre',
         'estado',
         'padre_id',

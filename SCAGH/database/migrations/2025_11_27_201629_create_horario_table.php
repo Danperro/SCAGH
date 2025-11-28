@@ -14,7 +14,7 @@ return new class extends Migration {
 
             // FK Laboratorio (catálogo)
             $table->unsignedBigInteger('laboratorio_id');
-            $table->foreign('laboratorio_id')->references('id')->on('catalogo');
+            $table->foreign('laboratorio_id')->references('id')->on('laboratorio');
 
             // FK Semestre
             $table->unsignedBigInteger('semestre_id');

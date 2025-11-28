@@ -297,10 +297,47 @@
 
                         <!-- SOLO ACTIVAMOS ESTE MÓDULO -->
                         <li class="nav-item">
-                            <a href="/Horarios" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-clock"></i> Gestión de Horarios
+                            <a href="/Cursos" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-journal-bookmark"></i> Gestión de Cursos
                             </a>
                         </li>
+
+                        <li class="nav-item">
+                            <a href="/Horarios" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-calendar-week"></i> Gestión de Horarios
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/Docentes" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-person-badge"></i> Gestión de Docentes
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/Estudiantes" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-people"></i> Gestión de Estudiantes
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/Asistencia" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-clipboard-check"></i> Realizar Asistencia
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/Reportes" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-file-earmark-bar-graph"></i> Gestión de Reportes
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/Usuarios" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-people-fill"></i> Gestión de Usuarios
+                            </a>
+                        </li>
+
 
                         <!-- ⛔ Los demás módulos todavía no existen — evitamos errores -->
                         {{-- 
