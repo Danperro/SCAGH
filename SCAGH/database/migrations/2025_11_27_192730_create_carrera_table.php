@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('facultad_id');
             $table->foreign('facultad_id')->references('id')->on('catalogo');
             
-            $table->string('nombre', 50)->unique();
+            $table->string('nombre', 150)->unique();
             $table->boolean('estado')->default(true);
 
             // Auditoría
