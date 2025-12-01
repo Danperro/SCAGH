@@ -39,7 +39,7 @@ class Curso extends Model
     // Relaciones
     public function carrera()
     {
-        return $this->belongsTo(Catalogo::class, 'carrera_id');
+        return $this->belongsTo(carrera::class, 'carrera_id');
     }
 
     public function ciclo()
