@@ -47,5 +47,27 @@ class Curso extends Model
         return $this->belongsTo(Catalogo::class, 'ciclo_id');
     }
 
-    
+    public function scopeSearch($query, $busqueda, $carrera_id, $facultad_id,$ciclo_id)
+    {
+        if ($busqueda) {
+            $query->where(
+                fn($q) =>
+                $q->where('nombre', 'like', "%$busqueda%")
+                    ->orWhere('codigo', 'like', "%$busqueda%")
+            );
+        }
+
+        if ($carrera_id) {
+            $query->where('carrera_id', $carrera_id);
+        }
+
+        if ($facultad_id) {
+            $query->whereRelation('carrera', 'facultad_id', $facultad_id);
+        }
+        if($ciclo_id){
+            $query->where('ciclo_id',$ciclo_id);
+        }
+
+        return $query;
+    }
 }

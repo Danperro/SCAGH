@@ -5,50 +5,77 @@
 
     <!-- Filtros -->
     <div class="card mb-4 shadow-sm p-4">
-        <div class="row g-2 align-items-end">
+
+        <!-- 🔹 Fila 1: Buscar, Ciclo, Botones -->
+        <div class="row g-3 align-items-end">
+
             <!-- Buscar -->
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-5">
                 <label class="form-label fw-semibold">Buscar</label>
-                <input class="form-control" type="text" id="query" wire:model.live="query">
+                <input class="form-control" type="text" wire:model.live.debounce.500ms="query"
+                    placeholder="Buscar curso...">
             </div>
 
-            <!-- Facultad -->
+            <!-- Ciclo -->
             <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Ciclo</label>
+                <select class="form-select" wire:model.live="filtrociclo_id">
+                    <option value="" hidden>Todos los ciclos</option>
+                    @foreach ($ciclos as $ciclo)
+                        <option value="{{ $ciclo->id }}">{{ $ciclo->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Botones -->
+            <div class="col-12 col-md-4 d-flex flex-column flex-md-row gap-2">
+                <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalCrearCurso"
+                    wire:click="limpiar">
+                    + Crear Curso
+                </button>
+
+                <button class="btn btn-outline-success w-100" wire:click="limpiar">
+                    Limpiar filtros
+                </button>
+            </div>
+
+        </div>
+
+        <hr class="my-4">
+
+        <!-- 🔹 Fila 2: Facultad y Carrera -->
+        <div class="row g-3">
+
+            <!-- Facultad -->
+            <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold">Facultad</label>
-                <select class="form-select" id="facultad_id" wire:model.live="facultad_id">
-                    <option value="" hidden>Todos las facultades</option>
+                <select class="form-select" wire:model.live="filtrofacultad_id">
+                    <option value="" hidden>Todas las facultades</option>
                     @foreach ($facultades as $facultad)
                         <option value="{{ $facultad->id }}">{{ $facultad->nombre }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <!-- Carrera-->
-            <div class="col-12 col-md-3">
+            <!-- Carrera -->
+            <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold">Carrera</label>
-                <select class="form-select" id="carrera_id" wire:model.live="carrera_id">
+                <select class="form-select" wire:model.live="filtrocarrera_id" @disabled(!$filtrofacultad_id)>
                     <option value="" hidden>Todas las carreras</option>
-                    @foreach ($carreras as $carrera)
+
+                    @foreach ($carrerasFiltro as $carrera)
                         <option value="{{ $carrera->id }}">{{ $carrera->nombre }}</option>
                     @endforeach
+
                 </select>
             </div>
 
-            <!-- Botón Crear nuevo Curso -->
-            <div class="col-12 col-md-3">
-                <button class="btn btn-success " data-bs-target="#modalCrearCurso" data-bs-toggle="modal"
-                    wire:click="limpiar">
-                    + Crear Curso
-                </button>
-            </div>
-            <!-- Botón Limpiar filtro -->
-            <div class="col-12 col-md-3">
-                <button class="btn btn-success " wire:click="limpiar">
-                    limpiar filtros
-                </button>
-            </div>
         </div>
+
     </div>
+
+
+
 
     <div class="card">
         <div class="table-responsive">
@@ -91,10 +118,26 @@
             <form wire:submit.prevent="CrearCurso" class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="modalCrearCursoLabel">Crear Curso</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" arial-label="close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"
+                        arial-label="close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
+                        <!-- SELECT FACULTADES -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Facultades</label>
+                            <select class="form-select @error('facultad_id') is-invalid @enderror"
+                                style="width:100%; white-space:normal;" wire:model.live="facultad_id">
+                                <option value="" hidden>Seleccionar</option>
+                                @foreach ($facultades as $facultad)
+                                    <option value="{{ $facultad->id }}">{{ $facultad->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @error('facultad_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <!-- SELECT CARRERAS -->
                         <div class="col-12">
                             <label class="form-label fw-semibold">Carreras</label>
                             <select class="form-select @error('carrera_id') is-invalid @enderror"
@@ -164,43 +207,75 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold">Editar Curso</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"></button>
                 </div>
 
                 <div class="modal-body">
                     <div class="row g-3">
-
-                        <!-- Select Carrera -->
+                        <!-- SELECT FACULTADES -->
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Carrera</label>
-                            <select class="form-select" wire:model.live="carrera_id">
+                            <label class="form-label fw-semibold">Facultades</label>
+                            <select class="form-select @error('facultad_id') is-invalid @enderror"
+                                style="width:100%; white-space:normal;" wire:model.live="facultad_id">
                                 <option value="" hidden>Seleccionar</option>
-                                @foreach ($carreras as $car)
-                                    <option value="{{ $car->id }}">{{ $car->nombre }}</option>
+                                @foreach ($facultades as $facultad)
+                                    <option value="{{ $facultad->id }}">{{ $facultad->nombre }}</option>
                                 @endforeach
                             </select>
+                            @error('facultad_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <!-- SELECT CARRERAS -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Carreras</label>
+                            <select class="form-select @error('carrera_id') is-invalid @enderror"
+                                style="width:100%; white-space:normal;" wire:model.live="carrera_id">
+                                <option value="" hidden>Seleccionar</option>
+                                @foreach ($carreras as $carrera)
+                                    <option value="{{ $carrera->id }}">{{ $carrera->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @error('carrera_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <!-- INPUT NOMBRE -->
+                        <div class="col-12 col-md-5">
+                            <label class="form-label fw-semibold @error('nombre') is-invalid @enderror">Nombre del
+                                Curso</label>
+                            <input type="text" class="form-control" wire:model.live="nombre"
+                                placeholder="Ingrese nombre">
+                            @error('nombre')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
 
-                        <div class="col-md-5">
-                            <label class="form-label fw-semibold">Nombre</label>
-                            <input class="form-control" wire:model.live="nombre">
+                        <!-- INPUT CÓDIGO -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-semibold @error('codigo') is-invalid @enderror">Código</label>
+                            <input type="text" class="form-control" wire:model.live="codigo"
+                                placeholder="Ej. EDU101">
+                            @error('codigo')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Código</label>
-                            <input class="form-control" wire:model.live="codigo">
-                        </div>
-
-                        <div class="col-md-3">
+                        <!-- SELECT CICLO -->
+                        <div class="col-12 col-md-3">
                             <label class="form-label fw-semibold">Ciclo</label>
-                            <select class="form-select" wire:model.live="ciclo_id">
-                                <option hidden>Seleccionar</option>
-                                @foreach ($ciclos as $cx)
-                                    <option value="{{ $cx->id }}">{{ $cx->nombre }}</option>
+                            <select class="form-select @error('ciclo_id') is-invalid @enderror"
+                                wire:model.live="ciclo_id">
+                                <option value="" hidden>Selecionar</option>
+                                @foreach ($ciclos as $ciclo)
+                                    <option value="{{ $ciclo->id }}">
+                                        {{ $ciclo->nombre }}
+                                    </option>
                                 @endforeach
                             </select>
+                            @error('ciclo_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
-
                     </div>
                 </div>
 
@@ -256,16 +331,17 @@
 
         // Cerrar los modales al recibir el evento
         Livewire.on('cerrarModal', () => {
-            const modalCrear = bootstrap.Modal.getInstance(document.getElementById('modalCrearCurso'));
-            if (modalCrear) modalCrear.hide();
+            // Obtener todos los modales visibles en la página
+            const modales = document.querySelectorAll('.modal.show');
 
-            const modalEditar = bootstrap.Modal.getInstance(document.getElementById(
-            'modalEditarCurso'));
-            if (modalEditar) modalEditar.hide();
+            modales.forEach(modal => {
+                const instancia = bootstrap.Modal.getInstance(modal);
 
-            const modalEliminar = bootstrap.Modal.getInstance(document.getElementById(
-                'modalEliminarCurso'));
-            if (modalEliminar) modalEliminar.hide();
+                // Si no existe instancia (ej. primer uso), la creamos
+                const modalBootstrap = instancia ?? new bootstrap.Modal(modal);
+
+                modalBootstrap.hide();
+            });
         });
 
         // Toast éxito

@@ -1,4 +1,4 @@
-<div class="container-fluid py-4">
+<section class="container-fluid py-4">
 
     <!-- Título -->
     <h2 class="fw-bold mb-1">Horarios</h2>
@@ -32,7 +32,7 @@
             <!-- Botón Crear Horario -->
             <div class="col-12 col-md-3">
                 <button class="btn btn-success w-100 px-4" data-bs-target="#modalCrearHorario" data-bs-toggle="modal"
-                    wire:click="">
+                    wire:click="limpiar">
                     + Crear un Nuevo Horario
                 </button>
             </div>
@@ -40,7 +40,7 @@
             <!-- Botón Añadir Curso -->
             <div class="col-12 col-md-3">
                 <button class="btn btn-success w-100 px-4" data-bs-target="#modalAñadirCurso" data-bs-toggle="modal"
-                    wire:click="">
+                    wire:click="limpiar">
                     + Añadir Curso
                 </button>
             </div>
@@ -112,69 +112,82 @@
         </div>
 
     </div>
-    <!-- Modal crear Horario -->
-    <div wire:ignore.self class="modal fade" id="modalCrearHorario" tabindex="-1"
-        aria-labelledby="modalCrearHorarioLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="modalCrearHorarioLabel">Crear Horario</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Formulario para agregar un curso al horario -->
 
-                    <!-- Fila para Laboratorio y Semestre -->
+    <!-- Modal crear Horario -->
+    <div wire:ignore.self class="modal fade" id="modalCrearHorario" tabindex="-1" aria-labelledby="modalCrearHorario"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <form wire:submit.prevent="CrearHorario" class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Crear Horario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"
+                        arial-label="close"></button>
+                </div>
+
+                <div class="modal-body">
+
                     <div class="row g-3">
-                        <!-- Combo de Laboratorio -->
+
+                        <!-- Laboratorio -->
                         <div class="col-md-6">
-                            <label for="laboratorioSelect" class="form-label">Seleccionar Laboratorio</label>
-                            <select class="form-select" id="laboratorioSelect" wire:model.live="laboratorio_id">
-                                <option value="" hidden>Seleccione</option>
-                                <!-- Se llenará con la BD -->
+                            <label class="form-label">Seleccionar Laboratorio</label>
+                            <select class="form-select @error('laboratorio_id') is-invalid @enderror"
+                                wire:model.live="laboratorio_id">
+                                <option hidden value="">Seleccione</option>
                                 @foreach ($laboratorios as $lab)
                                     <option value="{{ $lab->id }}">{{ $lab->nombre }}</option>
                                 @endforeach
                             </select>
+                            @error('laboratorio_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
-                        <!-- Combo de Semestre -->
+                        <!-- Semestre -->
                         <div class="col-md-6">
-                            <label for="semestreSelect" class="form-label">Seleccionar Semestre</label>
-                            <select class="form-select" id="semestreSelect" wire:model.live="semestre_id">
-                                <option value="" hidden>Seleccione</option>
-                                <!-- Se llenará con la BD -->
+                            <label class="form-label">Seleccionar Semestre</label>
+                            <select class="form-select @error('semestre_id') is-invalid @enderror"
+                                wire:model.live="semestre_id">
+                                <option hidden value="">Seleccione</option>
                                 @foreach ($semestres as $semestre)
                                     <option value="{{ $semestre->id }}">{{ $semestre->nombre }}</option>
                                 @endforeach
                             </select>
+                            @error('semestre_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
-                    <!-- Campo de Nombre del Horario -->
-                    <div class="mb-3">
-                        <label for="nombreHorario" class="form-label">Nombre del Horario</label>
-                        <input type="text" class="form-control" id="nombreHorario"
-                            placeholder="Ingrese nombre del horario" wire:model.live="nombre"
-                            @disabled(!$editableNombre)>
+
+                    <!-- Nombre -->
+                    <div class="mt-3">
+                        <label class="form-label">Nombre del Horario</label>
+                        <input type="text" class="form-control @error('nombre') is-invalid @enderror"
+                            wire:model.live="nombre" @disabled(!$editableNombre)>
+                        @error('nombre')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <!-- Radio Button para Editar Nombre del Horario -->
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="editNombre" id="editarNombreRadio"
-                                wire:model.live="editableNombre" value="1">
-                            <label class="form-check-label" for="editarNombreRadio">
-                                Editar Nombre
-                            </label>
-                        </div>
+                    <!-- Check editar -->
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" wire:model.live="editableNombre">
+                        <label class="form-check-label">Editar Nombre</label>
                     </div>
+
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-primary" wire:click="guardarHorario">Guardar</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">Cerrar</button>
+                    <button type="submit"class="btn btn-success" wire:loading.attr="disabled">
+                        <span wire:loading.remove>Guardar</span>
+                        <span wire:loading class="spinner-border spinner-border-sm"></span>
+                    </button>
                 </div>
-            </div>
+
+            </form>
         </div>
     </div>
 
@@ -208,7 +221,8 @@
                     <div class="row g-3 mt-1">
                         <div class="col-md-12">
                             <label for="carreraSelect" class="form-label">Seleccionar Carrera</label>
-                            <select class="form-select" id="carreraSelect" wire:model.live="carrera_id">
+                            <select class="form-select" id="carreraSelect" wire:model.live="carrera_id"
+                                @disabled(!$facultad_id)>
                                 <option value="" hidden>Seleccione</option>
                                 @foreach ($carreras as $carrera)
                                     <option value="{{ $carrera->id }}">{{ $carrera->nombre }}</option>
@@ -221,9 +235,12 @@
                     <div class="row g-3 mt-1">
                         <div class="col-md-6">
                             <label for="cursoSelect" class="form-label">Seleccionar Curso</label>
-                            <select class="form-select" id="cursoSelect" wire:model.live="curso_id">
+                            <select class="form-select" id="cursoSelect" wire:model.live="curso_id"
+                                @disabled(!$carrera_id)>
                                 <option value="" hidden>Seleccione</option>
-                                
+                                @foreach ($cursos as $curso)
+                                    <option value="{{ $curso->id }}">{{ $curso->nombre }}</option>
+                                @endforeach
                             </select>
                         </div>
 
@@ -273,5 +290,44 @@
         </div>
     </div>
 
+    <!-- TOAST DE ÉXITO -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+        <div id="toastExito" class="toast align-items-center text-bg-success border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastExitoTexto">
+                    <!-- Texto dinámico -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    document.addEventListener('livewire:initialized', () => {
 
-</div>
+        // Cerrar los modales al recibir el evento
+        Livewire.on('cerrarModal', () => {
+            // Obtener todos los modales visibles en la página
+            const modales = document.querySelectorAll('.modal.show');
+
+            modales.forEach(modal => {
+                const instancia = bootstrap.Modal.getInstance(modal);
+
+                // Si no existe instancia (ej. primer uso), la creamos
+                const modalBootstrap = instancia ?? new bootstrap.Modal(modal);
+
+                modalBootstrap.hide();
+            });
+        });
+
+
+        // Toast éxito
+        Livewire.on('toast-exito', (mensaje) => {
+            document.getElementById('toastExitoTexto').innerText = mensaje;
+            const toast = new bootstrap.Toast(document.getElementById('toastExito'));
+            toast.show();
+        });
+
+    });
+</script>
