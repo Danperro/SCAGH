@@ -301,7 +301,11 @@
                                 <i class="bi bi-journal-bookmark"></i> Gestión de Cursos
                             </a>
                         </li>
-
+                        <li class="nav-item">
+                            <a href="/Semestres" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-journal-bookmark"></i> Gestión de Semestres
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="/Horarios" class="nav-link text-white d-flex align-items-center gap-2">
                                 <i class="bi bi-calendar-week"></i> Gestión de Horarios

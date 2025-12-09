@@ -6,6 +6,7 @@ use App\Models\Carrera;
 use App\Models\Catalogo;
 use App\Models\Curso;
 use App\Models\Horario;
+use App\Models\HorarioCursoDocente;
 use App\Models\Laboratorio;
 use App\Models\Semestre;
 use Illuminate\Support\Facades\Log;
@@ -15,13 +16,13 @@ use Livewire\WithPagination;
 class Horarios extends Component
 {
     use WithPagination;
-    public $laboratorio_id, $semestre_id, $nombre, $editableNombre = false,
+    public $laboratorio_id, $semestre_id, $nombre, $editableNombre = false, $nombreHorario,
         $carrera_id, $facultad_id, $curso_id, $carreras = [], $cursos = [];
 
     public function limpiar()
     {
         $this->resetErrorBag();
-        $this->reset(['laboratorio_id', 'semestre_id', 'nombre', 'editableNombre']);
+        $this->reset(['laboratorio_id', 'semestre_id', 'nombreHorario', 'editableNombre']);
         $this->resetValidation();
     }
 
@@ -47,15 +48,14 @@ class Horarios extends Component
     protected $rules = [
         'laboratorio_id' => 'required',
         'semestre_id' => 'required',
-        'nombre' => 'required|min:5|unique:horario,nombre'
+        'nombreHorario' => 'required|unique:horario,nombre',
     ];
 
     protected $messages = [
         'laboratorio_id.required' => 'Debe seleccionar un laboratorio.',
         'semestre_id.required' => 'Debe seleccionar un semestre.',
-        'nombre.required' => 'El nombre del horario es obligatorio.',
-        'nombre.min' => 'El nombre debe tener al menos 5 caracteres.',
-        'nombre.unique' => 'Ya existe un horario registrado con este nombre'
+        'nombreHorario.unique' => 'Ya existe un horario registrado con este nombre',
+        'nombreHorario.required' => 'El nombre del horario es obligatorio.',
     ];
 
     public function updated($campo)
@@ -75,9 +75,9 @@ class Horarios extends Component
         $semestre = Semestre::find($this->semestre_id);
 
         if ($laboratorio && $semestre) {
-            $this->nombre = 'HORARIO DEL ' . $laboratorio->nombre . ' DEL SEMESTRE ' . $semestre->nombre;
+            $this->nombreHorario = 'HORARIO DEL ' . $laboratorio->nombre . ' DEL SEMESTRE ' . $semestre->nombre;
         } else {
-            $this->nombre = '';
+            $this->nombreHorario = '';
         }
     }
     public function toggleEditableNombre()
@@ -87,14 +87,12 @@ class Horarios extends Component
 
     public function CrearHorario()
     {
+        $this->validate();
         try {
-
-            $this->validate();
-
             Horario::create([
                 'semestre_id' => $this->semestre_id,
                 'laboratorio_id' => $this->laboratorio_id,
-                'nombre' => $this->nombre
+                'nombre' => $this->nombreHorario,
             ]);
 
             $this->limpiar();
@@ -109,10 +107,16 @@ class Horarios extends Component
     {
         try {
             $this->validate();
-
+            HorarioCursoDocente::create([
+                'horario_id'=>$this->horario_id,
+                'docente_curso_id'=>$this->docente_curso_id,
+                'semana_id'=>$this->semana_id,
+                'hora_inicio'=>$this->hora_inicio,
+                'hora_fin'=>$this->hora_fin
+            ]);
             $this->limpiar();
             $this->dispatch('cerrarModal');
-            $this->dispatch('toast-exito','Se asigno el Curso correctamente');
+            $this->dispatch('toast-exito', 'Se asigno el Curso correctamente');
         } catch (\Throwable $e) {
             Log::error("Error al Asignar Curso " . $e->getMessage());
         }
@@ -120,9 +124,19 @@ class Horarios extends Component
 
     public function render()
     {
+        $fechaActual = now();
+        $semestreVigente = Semestre::where('fecha_inicio', '<=', $fechaActual)
+            ->where('fecha_fin', '>=', $fechaActual)->first();
+        $horarios = collect();
+        if ($semestreVigente) {
+            $horarios = Horario::where('semestre_id', $semestreVigente->id)->get();
+        }
+
         $laboratorios = Laboratorio::get();
-        $semestres = Semestre::get();
-        $horarios = horario::get();
+
+        $semestres = Semestre::where('fecha_inicio', '<=', $fechaActual)
+            ->where('fecha_fin', '>=', $fechaActual)->get();
+
         $facultades = catalogo::where('padre_id', 4)->get();
         $dias = catalogo::where('padre_id', 3)->get();
         $carreras = Carrera::get();

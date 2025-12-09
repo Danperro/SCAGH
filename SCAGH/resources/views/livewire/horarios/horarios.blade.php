@@ -161,12 +161,12 @@
                     </div>
 
 
-                    <!-- Nombre -->
+                    <!-- Nombre_horario -->
                     <div class="mt-3">
                         <label class="form-label">Nombre del Horario</label>
-                        <input type="text" class="form-control @error('nombre') is-invalid @enderror"
-                            wire:model.live="nombre" @disabled(!$editableNombre)>
-                        @error('nombre')
+                        <input type="text" class="form-control @error('nombreHorario') is-invalid @enderror"
+                            wire:model.live="nombreHorario" @disabled(!$editableNombre)>
+                        @error('nombreHorario')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

@@ -14,21 +14,21 @@ class Cursos extends Component
     use WithPagination;
     public $filtrocurso_id, $filtrociclo_id, $filtrocarrera_id, $filtrofacultad_id, $query;
     public $curso_id, $nombre, $codigo, $ciclo_id, $carrera_id, $facultad_id;
-    public $carreras = [];
+
     public $editando = false;
     public $carrerasFiltro = []; // Para los filtros de la tabla
 
     public function mount()
     {
-        $this->carreras = Carrera::all(); // para evitar select vacío al inicio
+
         $this->carrerasFiltro = Carrera::all();
     }
     public function updatedFacultadId($value)
     {
         if (!empty($value)) {
-            $this->carreras = Carrera::where('facultad_id', $value)->get();
+            Carrera::where('facultad_id', $value)->get();
         } else {
-            $this->carreras = Carrera::all();
+            Carrera::all();
         }
 
         // Solo borrar carrera_id cuando NO estamos editando
@@ -49,7 +49,7 @@ class Cursos extends Component
         // 2) Primero: facultad + lista de carreras correctas
 
         $this->facultad_id = $carrera->facultad_id;
-        $this->carreras = Carrera::where('facultad_id', $carrera->facultad_id)->get();
+        $carrera = Carrera::where('facultad_id', $carrera->facultad_id)->get();
 
 
         // 3) Recién al final: carrera seleccionada
@@ -64,7 +64,7 @@ class Cursos extends Component
     {
         $this->reset(['facultad_id', 'carrera_id', 'ciclo_id', 'nombre', 'codigo', 'query']);
         $this->reset(['filtrofacultad_id', 'filtrocarrera_id', 'filtrociclo_id']);
-        $this->carreras = Carrera::all();
+
         $this->editando = false;
         $this->resetValidation();
     }
@@ -147,14 +147,14 @@ class Cursos extends Component
     public function render()
     {
         $facultades = catalogo::where('padre_id', 4)->get();
-
+        $carreras = Carrera::get();
         $cursos = Curso::with(['carrera', 'ciclo'])
             ->search($this->query, $this->filtrocarrera_id, $this->filtrofacultad_id, $this->filtrociclo_id)
             ->get();
         $ciclos = catalogo::where('padre_id', 13)->get();
         return view('livewire.cursos.cursos', [
             'facultades' => $facultades,
-            'carreras' => $this->carreras,
+            'carreras' => $carreras,
             'carrerasFiltro' => $this->carrerasFiltro,
             'cursos' => $cursos,
             'ciclos' => $ciclos

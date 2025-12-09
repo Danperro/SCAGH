@@ -1,3 +1,408 @@
-<div>
-    {{-- Knowing others is intelligence; knowing yourself is true wisdom. --}}
-</div>
+<section class="container-fluid py-4">
+    <!-- Titulos -->
+    <h2 class="fw-bold mb-1">Docentes</h2>
+    <p class="text-muted mb-4">Gestión de docentes</p>
+
+    <!-- Filtros -->
+    <div class="card mb-4 shadow-sm p-4">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">Buscar</label>
+                <input class="form-control" type="text" wire:model.live.debounce.500ms="query"
+                    placeholder="Bucar docente...">
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Especialidad</label>
+                <select class="form-select" wire:model.live="filtroespecialidad_id">
+                    <option value="" hidden>Todos las especialidades</option>
+                    @foreach ($especialidades as $especialidad)
+                        <option value="{{ $especialidad->id }}">{{ $especialidad->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Estado</label>
+                <select class="form-select" wire:model.live="filtroestado">
+                    <option value="" hidden>Todos los estados</option>
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2 d-flex flex-column gap-2">
+                <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalCrearDocente"
+                    wire:click="limpiar">+ Crear Docente</button>
+
+                <button class="btn btn-outline-success w-100" wire:click="limpiar">
+                    Limpiar filtros</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr class="text-center">
+                        <th scope="col">Docente</th>
+                        <th scope="col">Especialidad</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($docentes as $docente)
+                        <tr>
+                            <td>{{ $docente->persona->nombre . ' ' . $docente->persona->apellido_paterno . ' ' . $docente->persona->apellido_materno }}
+                            </td>
+                            <td>{{ $docente->especialidad->nombre }}</td>
+                            <td class="text-center">
+                                <span class="badge {{ $docente->estado ? 'bg-success' : 'bg-danger' }}">
+                                    {{ $docente->estado_texto }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-sm" wire:click="selectInfo({{ $docente->id }})"
+                                    data-bs-toggle="modal" data-bs-target="#modalEditarDocente">
+                                    <i class="bi bi-pencil-square"></i></button>
+
+                                <button class="btn btn-danger btn-sm" wire:click="selectInfo({{ $docente->id }})"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminarDocente">
+                                    <i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Crear Docente -->
+    <div wire:ignore.self class="modal fade" id="modalCrearDocente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+
+            <form wire:submit.prevent="CrearDocente" class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Crear Docente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row g-3">
+
+                        <!-- NOMBRE -->
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control @error('nombre') is-invalid @enderror"
+                                wire:model.live="nombre">
+                            @error('nombre')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- APELLIDO PATERNO -->
+                        <div class="col-md-4">
+                            <label class="form-label">Apellido Paterno</label>
+                            <input type="text" class="form-control @error('apellido_paterno') is-invalid @enderror"
+                                wire:model.live="apellido_paterno">
+                            @error('apellido_paterno')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- APELLIDO MATERNO -->
+                        <div class="col-md-4">
+                            <label class="form-label">Apellido Materno</label>
+                            <input type="text" class="form-control @error('apellido_materno') is-invalid @enderror"
+                                wire:model.live="apellido_materno">
+                            @error('apellido_materno')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- DNI -->
+                        <div class="col-md-4">
+                            <label class="form-label">DNI</label>
+                            <input type="text" class="form-control @error('dni') is-invalid @enderror"
+                                wire:model.live="dni">
+                            @error('dni')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- TELEFONO -->
+                        <div class="col-md-4">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" class="form-control @error('telefono') is-invalid @enderror"
+                                wire:model.live="telefono">
+                            @error('telefono')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- CORREO -->
+                        <div class="col-md-4">
+                            <label class="form-label">Correo</label>
+                            <input type="email" class="form-control @error('correo') is-invalid @enderror"
+                                wire:model.live="correo">
+                            @error('correo')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- FECHA NACIMIENTO -->
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de nacimiento</label>
+                            <input type="date" class="form-control @error('fecha_nacimiento') is-invalid @enderror"
+                                wire:model.live="fecha_nacimiento">
+                            @error('fecha_nacimiento')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- ESPECIALIDAD -->
+                        <div class="col-md-6 ">
+                            <label class="form-label">Especialidad</label>
+                            <select class="form-select  @error('especialidad_id') is-invalid @enderror"
+                                wire:model.live="especialidad_id">
+                                <option hidden value="">Seleccione</option>
+                                @foreach ($especialidades as $e)
+                                    <option value="{{ $e->id }}">{{ $e->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @error('especialidad_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">Cerrar</button>
+
+                    <button type="submit" class="btn btn-success" wire:loading.attr="disabled">
+                        <span wire:loading.remove>Guardar</span>
+                        <span wire:loading class="spinner-border spinner-border-sm"></span>
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Modal Editar Docente -->
+    <div wire:ignore.self class="modal fade" id="modalEditarDocente" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+
+            <form wire:submit.prevent="EditarDocente" class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Editar Docente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row g-3">
+
+                        <!-- NOMBRE -->
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control @error('nombre') is-invalid @enderror"
+                                wire:model.live="nombre">
+                            @error('nombre')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- APELLIDO PATERNO -->
+                        <div class="col-md-4">
+                            <label class="form-label">Apellido Paterno</label>
+                            <input type="text" class="form-control @error('apellido_paterno') is-invalid @enderror"
+                                wire:model.live="apellido_paterno">
+                            @error('apellido_paterno')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- APELLIDO MATERNO -->
+                        <div class="col-md-4">
+                            <label class="form-label">Apellido Materno</label>
+                            <input type="text"
+                                class="form-control @error('apellido_materno') is-invalid @enderror"
+                                wire:model.live="apellido_materno">
+                            @error('apellido_materno')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- DNI -->
+                        <div class="col-md-4">
+                            <label class="form-label">DNI</label>
+                            <input type="text" class="form-control @error('dni') is-invalid @enderror"
+                                wire:model.live="dni">
+                            @error('dni')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- TELEFONO -->
+                        <div class="col-md-4">
+                            <label class="form-label">Teléfono</label>
+                            <input type="text" class="form-control @error('telefono') is-invalid @enderror"
+                                wire:model.live="telefono">
+                            @error('telefono')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- CORREO -->
+                        <div class="col-md-4">
+                            <label class="form-label">Correo</label>
+                            <input type="email" class="form-control @error('correo') is-invalid @enderror"
+                                wire:model.live="correo">
+                            @error('correo')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- FECHA NACIMIENTO -->
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de nacimiento</label>
+                            <input type="date"
+                                class="form-control @error('fecha_nacimiento') is-invalid @enderror"
+                                wire:model.live="fecha_nacimiento">
+                            @error('fecha_nacimiento')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- ESPECIALIDAD -->
+                        <div class="col-md-6">
+                            <label class="form-label">Especialidad</label>
+                            <select class="form-select @error('especialidad_id') is-invalid @enderror"
+                                wire:model.live="especialidad_id">
+                                <option hidden value="">Seleccione</option>
+                                @foreach ($especialidades as $e)
+                                    <option value="{{ $e->id }}">{{ $e->nombre }}</option>
+                                @endforeach
+                            </select>
+                            @error('especialidad_id')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">Cerrar</button>
+
+                    <button type="submit" class="btn btn-success" wire:loading.attr="disabled">
+                        <span wire:loading.remove>Guardar</span>
+                        <span wire:loading class="spinner-border spinner-border-sm"></span>
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- MODAL DE ELIMINAR DOCENTE -->
+    <div wire:ignore.self class="modal fade" id="modalEliminarDocente" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-body text-center py-5">
+
+                    <div class="mb-3">
+                        <i class="bi bi-trash-fill text-danger fs-1"></i>
+                    </div>
+
+                    <h4 class="fw-bold">¿Estas seguro de eliminar al Docente?</h4>
+
+                    <p class="text-muted">
+                        Esta acción es permanente y no podrás recuperarlo.
+                    </p>
+
+                    <div class="d-flex gap-3 mt-4">
+                        <button class="btn btn-light flex-fill" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-danger flex-fill" wire:click="EliminarDocente">Eliminar</button>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TOAST DE GENERAL -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+        <div id="toastGeneral" class="toast align-items-center text-white fw-bold border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastGeneralTexto">
+
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+<script>
+    document.addEventListener('livewire:initialized', () => {
+
+        // Cerrar los modales al recibir el evento
+        Livewire.on('cerrarModal', () => {
+            // Obtener todos los modales visibles en la página
+            const modales = document.querySelectorAll('.modal.show');
+
+            modales.forEach(modal => {
+                const instancia = bootstrap.Modal.getInstance(modal);
+
+                // Si no existe instancia (ej. primer uso), la creamos
+                const modalBootstrap = instancia ?? new bootstrap.Modal(modal);
+
+                modalBootstrap.hide();
+            });
+        });
+
+        // Toast general
+        Livewire.on('toast-general', ({
+            mensaje,
+            tipo
+        }) => {
+            const toast = document.getElementById('toastGeneral');
+
+            // Limpia clases previas
+            toast.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+
+            // Agrega la clase según el tipo
+            toast.classList.add(`bg-${tipo}`);
+
+            // Cambia el texto
+            document.getElementById('toastGeneralTexto').innerText = mensaje;
+
+            // Muestra el toast
+            const toastShow = new bootstrap.Toast(toast);
+            toastShow.show();
+        });
+
+    });
+</script>

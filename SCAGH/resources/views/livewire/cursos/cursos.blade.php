@@ -76,15 +76,15 @@
 
 
 
-
+    <!-- Tabla -->
     <div class="card">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
-                    <tr class="text-centered">
-                        <th scope="col">nombre</th>
-                        <th scope="col">carrera</th>
-                        <th scope="col">ciclo</th>
+                    <tr class="text-center">
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Carrera</th>
+                        <th scope="col">Ciclo</th>
                         <th scope="col">Acciones</th>
                     </tr>
                 </thead>
@@ -93,8 +93,8 @@
                         <tr>
                             <td>{{ $curso->nombre }}</td>
                             <td>{{ $curso->carrera->nombre }}</td>
-                            <td>{{ $curso->ciclo->nombre }}</td>
-                            <td>
+                            <td class="text-center">{{ $curso->ciclo->nombre }}</td>
+                            <td class="text-center">
                                 <button class="btn btn-warning btn-sm" wire:click="selectInfo({{ $curso->id }})"
                                     data-bs-toggle="modal" data-bs-target="#modalEditarCurso">
                                     <i class="bi bi-pencil-square"></i>
