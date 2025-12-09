@@ -26,6 +26,8 @@ return new class extends Migration {
             $table->unsignedBigInteger('grupo_id');
             $table->foreign('grupo_id')->references('id')->on('catalogo');
 
+            $table->boolean('estado')->default(true);
+            
             // Auditoría
             $table->dateTime('fecha_cr')->nullable();
             $table->unsignedBigInteger('usuario_cr')->nullable();
@@ -33,6 +35,11 @@ return new class extends Migration {
             $table->unsignedBigInteger('usuario_md')->nullable();
 
             $table->timestamps();
+            // combinación única
+            $table->unique(
+                ['curso_id', 'docente_id', 'semestre_id', 'grupo_id'],
+                'docente_curso_unique'
+            );
         });
     }
 

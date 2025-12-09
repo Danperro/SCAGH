@@ -2,9 +2,13 @@
 
 namespace App\Livewire\Docentes;
 
+use App\Models\Carrera;
 use App\Models\Catalogo;
+use App\Models\Curso;
 use App\Models\Docente;
 use App\Models\Persona;
+use App\Models\Semestre;
+use App\Models\DocenteCurso;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Url;
@@ -15,6 +19,9 @@ class Docentes extends Component
     use WithPagination;
     public $docente_id, $persona_id, $nombre, $apellido_paterno, $apellido_materno, $dni, $telefono, $correo, $fecha_nacimiento, $especialidad_id;
     public $query = '', $filtroespecialidad_id, $filtroestado;
+    public $asignacionesDocente = [], $gruposSeleccionados = [];
+    public $carrera_id, $facultad_id, $curso_id, $carreras = [], $cursos = [], $semestre_id, $gruposAsignadosCursoActual = [];
+
     #[Url('Busqueda')]
     public function selectInfo($id)
     {
@@ -42,12 +49,13 @@ class Docentes extends Component
         $this->resetErrorBag();
         $this->resetValidation();
         $this->reset(['docente_id', 'nombre', 'apellido_paterno', 'apellido_materno', 'dni', 'telefono', 'correo', 'fecha_nacimiento', 'especialidad_id']);
-        $this->reset(['query','filtroespecialidad_id','filtroestado']);
+        $this->reset(['query', 'filtroespecialidad_id', 'filtroestado']);
+        $this->reset(['carrera_id', 'facultad_id', 'curso_id', 'carreras', 'cursos', 'semestre_id', 'gruposSeleccionados']);
         $this->resetPage();
     }
 
 
-    protected function rules()
+    protected function rulesDocente()
     {
         return [
             'nombre' => 'required|regex:/^[\pL\s]+$/u|min:2|max:50',
@@ -75,9 +83,23 @@ class Docentes extends Component
             ],
 
             'especialidad_id' => 'required|exists:catalogo,id',
+
         ];
     }
 
+
+    protected function rulesAsignacionCurso()
+    {
+        return [
+            'docente_id'          => 'required|exists:docente,id',
+            'facultad_id'         => 'required|exists:catalogo,id',
+            'carrera_id'          => 'required|exists:carrera,id',
+            'curso_id'            => 'required|exists:curso,id',
+            'semestre_id'         => 'required|exists:semestre,id',
+            'gruposSeleccionados'   => 'required|array|min:1',
+            'gruposSeleccionados.*' => 'exists:catalogo,id',
+        ];
+    }
 
     protected $messages = [
 
@@ -121,12 +143,43 @@ class Docentes extends Component
         // Especialidad
         'especialidad_id.required' => 'Debe seleccionar una especialidad.',
         'especialidad_id.exists' => 'La especialidad seleccionada no es válida.',
+
+        // Asigna Curso
+        'facultad_id.required'         => 'Debe seleccionar una facultad.',
+        'carrera_id.required'          => 'Debe seleccionar una carrera.',
+        'curso_id.required'            => 'Debe seleccionar un curso.',
+        'semestre_id.required'         => 'Debe seleccionar un semestre.',
+        'gruposSeleccionados.required' => 'Debe seleccionar al menos un grupo.',
     ];
 
 
     public function updated($campo)
     {
-        $this->validateOnly($campo);
+        $camposDocente = [
+            'nombre',
+            'apellido_paterno',
+            'apellido_materno',
+            'dni',
+            'telefono',
+            'correo',
+            'fecha_nacimiento',
+            'especialidad_id',
+        ];
+
+        $camposAsignacion = [
+            'docente_id',
+            'facultad_id',
+            'carrera_id',
+            'curso_id',
+            'semestre_id',
+            'gruposSeleccionados',
+        ];
+
+        if (in_array($campo, $camposDocente)) {
+            $this->validateOnly($campo, $this->rulesDocente());
+        } elseif (in_array($campo, $camposAsignacion)) {
+            $this->validateOnly($campo, $this->rulesAsignacionCurso());
+        }
     }
 
 
@@ -138,7 +191,7 @@ class Docentes extends Component
 
     public function CrearDocente()
     {
-        $this->validate();
+        $this->validate($this->rulesDocente());
         try {
             $persona = Persona::create([
                 'nombre' => strtoupper($this->nombre),
@@ -166,7 +219,7 @@ class Docentes extends Component
 
     public function EditarDocente()
     {
-        $this->validate();
+        $this->validate($this->rulesDocente());
         try {
 
             $docente = Docente::findOrFail($this->docente_id);
@@ -221,16 +274,147 @@ class Docentes extends Component
         }
     }
 
+
+    public function updatedFacultadId($value)
+    {
+        if (!empty($value)) {
+            $this->carreras = Carrera::where('facultad_id', $value)->get();
+        } else {
+            $this->carreras = carrera::all();
+        }
+        $this->carrera_id = '';
+        $this->cursos = [];
+        $this->curso_id = '';
+    }
+
+    public function updatedCarreraId($value)
+    {
+        $this->curso_id = '';
+        if (empty($value)) {
+            $this->cursos = [];
+            return;
+        }
+
+        $fechaActual = now();
+        $semestreVigente = Semestre::where('fecha_inicio', '<=', $fechaActual)
+            ->where('fecha_fin', '>=', $fechaActual)
+            ->first();
+
+        if (!$semestreVigente) {
+            $this->cursos = Curso::where('carrera_id', $value)
+                ->orderBy('nombre')
+                ->get();
+            return;
+        }
+
+        $cursosOcupados = DocenteCurso::where('semestre_id', $semestreVigente->id)
+            ->when($this->docente_id, function ($q) {
+                // Excluir al docente actual del filtro
+                $q->where('docente_id', '!=', $this->docente_id);
+            })
+            ->pluck('curso_id');
+
+        $this->cursos = Curso::where('carrera_id', $value)
+            ->when($cursosOcupados->isNotEmpty(), function ($q) use ($cursosOcupados) {
+                $q->whereNotIn('id', $cursosOcupados);
+            })
+            ->orderBy('nombre')
+            ->get();
+    }
+
+
+    public function updatedCursoId($value)
+    {
+        $this->gruposSeleccionados = [];
+
+        if ($this->docente_id && $this->semestre_id && $value) {
+            $this->gruposAsignadosCursoActual = DocenteCurso::where('docente_id', $this->docente_id)
+                ->where('curso_id', $value)
+                ->where('semestre_id', $this->semestre_id)
+                ->pluck('grupo_id')
+                ->toArray();
+        } else {
+            $this->gruposAsignadosCursoActual = [];
+        }
+    }
+
+
+    public function GuardarAsignacionCurso()
+    {
+        $this->validate($this->rulesAsignacionCurso());
+        try {
+            foreach ($this->gruposSeleccionados as $grupoId) {
+                // si ya existiera esa combinación, no la duplica
+                DocenteCurso::firstOrCreate(
+                    [
+                        'docente_id'  => $this->docente_id,
+                        'curso_id'    => $this->curso_id,
+                        'semestre_id' => $this->semestre_id,
+                        'grupo_id'    => $grupoId,
+                    ]
+                );
+            }
+            $this->limpiar();
+            $this->dispatch('cerrarModal');
+            $this->dispatch('toast-general', mensaje: 'Docente asignado al curso correctamente.', tipo: 'success');
+        } catch (\Throwable $e) {
+            Log::error("Error al asignar el curso al docente " . $e->getMessage());
+            $this->dispatch('toast-general', mensaje: 'Ocurrió un error al asignar el curso al docente.', tipo: 'danger');
+        }
+    }
+
+
     public function render()
     {
+        $fechaActual = now();
+
         $docentes = Docente::with('persona')
             ->search($this->query, $this->filtroespecialidad_id, $this->filtroestado)
             ->orderBy('id', 'desc')
             ->paginate(10);
+
         $especialidades = Catalogo::where('padre_id', 26)->get();
+
+
+        // Semestre vigente (ej. 2025-II)
+        $semestreVigente = Semestre::where('fecha_inicio', '<=', $fechaActual)
+            ->where('fecha_fin', '>=', $fechaActual)
+            ->first();
+
+        // Combo de semestre (normalmente 1)
+        $semestres = $semestreVigente ? collect([$semestreVigente]) : collect();
+
+
+        // Ajusta este filtro al que uses para GRUPOS en tu catálogo
+        $grupos = Catalogo::where('padre_id', 36)->get(); // <-- cambia 999 por el padre_id de "Grupos"
+        $facultades = catalogo::where('padre_id', 4)->get();
+
+        // Si aún no se ha elegido facultad/carrera, inicializamos
+        if (empty($this->carreras)) {
+            $this->carreras = Carrera::all();
+        }
+
+        // ===== ASIGNACIONES DEL DOCENTE EN EL SEMESTRE ACTUAL =====
+        if ($this->docente_id && $semestreVigente) {
+            $this->asignacionesDocente = DocenteCurso::with(['curso', 'semestre', 'grupo'])
+                ->where('docente_id', $this->docente_id)
+                ->where('semestre_id', $semestreVigente->id)
+                ->orderBy('id', 'desc')
+                ->get();
+        } else {
+            $this->asignacionesDocente = collect(); // vacío cuando no hay docente seleccionado
+        }
+
         return view('livewire.docentes.docentes', [
             'docentes' => $docentes,
-            'especialidades' => $especialidades
+            'especialidades' => $especialidades,
+            'cursos'        =>  $this->cursos,
+            'semestres'     => $semestres,
+            'grupos'        => $grupos,
+            'facultades' => $facultades,
+            'carreras' => $this->carreras,
+            'asignacionesDocente' => $this->asignacionesDocente,
+            'gruposAsignadosCursoActual' => $this->gruposAsignadosCursoActual,
         ]);
     }
 }

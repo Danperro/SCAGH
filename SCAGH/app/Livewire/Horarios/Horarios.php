@@ -141,6 +141,7 @@ class Horarios extends Component
         $dias = catalogo::where('padre_id', 3)->get();
         $carreras = Carrera::get();
         $cursos = Curso::get();
+        
         return view('livewire.horarios.horarios', [
             'laboratorios' => $laboratorios,
             'semestres' => $semestres,

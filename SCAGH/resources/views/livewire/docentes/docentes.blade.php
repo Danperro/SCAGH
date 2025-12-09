@@ -68,6 +68,10 @@
                                 </span>
                             </td>
                             <td class="text-center">
+                                <button class="btn btn-info btn-sm" wire:click="selectInfo({{ $docente->id }})"
+                                    data-bs-toggle="modal" data-bs-target="#modalAsignarCurso">
+                                    <i class="bi bi-journal-bookmark"></i>
+                                </button>
                                 <button class="btn btn-warning btn-sm" wire:click="selectInfo({{ $docente->id }})"
                                     data-bs-toggle="modal" data-bs-target="#modalEditarDocente">
                                     <i class="bi bi-pencil-square"></i></button>
@@ -359,6 +363,159 @@
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto"
                     data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- MODAL ASIGNNAR CURSO -->
+    <div wire:ignore.self class="modal fade" id="modalAsignarCurso" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        Asignar cursos –
+                        <span class="text-primary">
+                            {{ $nombre . ' ' . $apellido_paterno . ' ' . $apellido_materno }}
+                        </span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form wire:submit.prevent="GuardarAsignacionCurso">
+                        <!-- =============== FACULTAD =============== -->
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="facultadSelect" class="form-label">Seleccionar Facultad</label>
+                                <select class="form-select" id="facultadSelect" wire:model.live="facultad_id">
+                                    <option value="" hidden>Seleccione</option>
+                                    @foreach ($facultades as $facultad)
+                                        <option value="{{ $facultad->id }}">{{ $facultad->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- =============== CARRERA =============== -->
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-12">
+                                <label for="carreraSelect" class="form-label">Seleccionar Carrera</label>
+                                <select class="form-select" id="carreraSelect" wire:model.live="carrera_id"
+                                    @disabled(!$facultad_id)>
+                                    <option value="" hidden>Seleccione</option>
+                                    @foreach ($carreras as $carrera)
+                                        <option value="{{ $carrera->id }}">{{ $carrera->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <!-- =============== CURSOS =============== -->
+                            <div class="col-md-6">
+                                <label class="form-label">Curso</label>
+                                <select class="form-select @error('curso_id') is-invalid @enderror"
+                                    wire:model.live="curso_id" @disabled(!$carrera_id)>
+                                    <option value="" hidden>Seleccione</option>
+                                    @foreach ($cursos as $curso)
+                                        <option value="{{ $curso->id }}">{{ $curso->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('curso_id')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <!-- =============== SEMESTRES =============== -->
+                            <div class="col-md-6">
+                                <label class="form-label">Semestre</label>
+                                <select class="form-select @error('semestre_id') is-invalid @enderror"
+                                    wire:model="semestre_id">
+                                    <option value="" hidden>Seleccione</option>
+                                    @foreach ($semestres as $sem)
+                                        <option value="{{ $sem->id }}">{{ $sem->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                @error('semestre_id')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <!-- =============== GRUPOS =============== -->
+                            <div class="col-12">
+                                <label class="form-label">Grupos</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    @foreach ($grupos as $grupo)
+                                        @php
+                                            $yaAsignado = in_array($grupo->id, $gruposAsignadosCursoActual ?? []);
+                                        @endphp
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                id="grupo{{ $grupo->id }}" value="{{ $grupo->id }}"
+                                                wire:model.live="gruposSeleccionados"
+                                                @if ($yaAsignado) disabled checked @endif>
+                                            <label class="form-check-label" for="grupo{{ $grupo->id }}">
+                                                {{ $grupo->nombre }}
+                                                @if ($yaAsignado)
+                                                    <span class="badge bg-success ms-1">Asignado</span>
+                                                @endif
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @error('gruposSeleccionados')
+                                    <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                wire:click="limpiar">Cancelar</button>
+                            <button type="submit" class="btn btn-success">Guardar asignación</button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <h6 class="fw-bold mb-2">Cursos asignados</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Curso</th>
+                                    <th>Semestre</th>
+                                    <th>Grupo</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($asignacionesDocente as $asig)
+                                    <tr>
+                                        <td>{{ $asig->curso->nombre }}</td>
+                                        <td>{{ $asig->semestre->nombre }}</td>
+                                        <td>{{ $asig->grupo->nombre }}</td>
+                                        <td class="text-center">
+                                            <button class="btn btn-outline-danger btn-sm"
+                                                wire:click="eliminarAsignacion({{ $asig->id }})">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            No hay cursos asignados.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
             </div>
         </div>
     </div>

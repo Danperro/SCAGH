@@ -74,8 +74,7 @@
 
     </div>
 
-
-
+    
     <!-- Tabla -->
     <div class="card">
         <div class="table-responsive">

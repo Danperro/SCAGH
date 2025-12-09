@@ -14,6 +14,7 @@ class DocenteCurso extends Model
         'docente_id',
         'semestre_id',
         'grupo_id',
+        'estado',
         'fecha_cr',
         'usuario_cr',
         'fecha_md',
