@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-class Estudiante extends Model
+class EstudianteCurso extends Model
 {
-    protected $table = 'estudiante';
+    protected $table = 'estudiante_curso';
 
     protected $fillable = [
-        'persona_id',
-        'carrera_id',
-        'codigo',
+        'estudiante_id',
+        'curso_id',
+        'semestre_id',
         'estado',
         'fecha_cr',
         'usuario_cr',
@@ -31,17 +31,22 @@ class Estudiante extends Model
 
         static::updating(function ($model) {
             $model->fecha_md = now();
-            $model->usuario_md =  Auth::id() ?? null;
+            $model->usuario_md = Auth::id() ?? null;
         });
     }
 
-    public function persona()
+    public function estudiante()
     {
-        return $this->belongsTo(Persona::class);
+        return $this->belongsTo(Estudiante::class);
     }
 
-    public function carrera()
+    public function curso()
     {
-        return $this->belongsTo(Carrera::class);
+        return $this->belongsTo(Curso::class);
+    }
+
+    public function semestre()
+    {
+        return $this->belongsTo(Semestre::class);
     }
 }
