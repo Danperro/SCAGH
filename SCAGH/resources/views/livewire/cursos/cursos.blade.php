@@ -74,7 +74,7 @@
 
     </div>
 
-    
+
     <!-- Tabla -->
     <div class="card">
         <div class="table-responsive">
@@ -229,7 +229,8 @@
                         <div class="col-12">
                             <label class="form-label fw-semibold">Carreras</label>
                             <select class="form-select @error('carrera_id') is-invalid @enderror"
-                                style="width:100%; white-space:normal;" wire:model.live="carrera_id">
+                                style="width:100%; white-space:normal;" wire:model.live="carrera_id"
+                                wire:key="carreras-{{ $facultad_id }}">
                                 <option value="" hidden>Seleccionar</option>
                                 @foreach ($carreras as $carrera)
                                     <option value="{{ $carrera->id }}">{{ $carrera->nombre }}</option>

@@ -1,6 +1,40 @@
 <section class="container-fluid py-4">
 
+    <style>
+        /* Botón base */
+        .estado-btn {
+            font-size: 0.85rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            border: none;
+        }
 
+        /* Estado seleccionado */
+        .estado-btn.asistio {
+            background-color: #28a745;
+            /* verde */
+            color: white;
+        }
+
+        .estado-btn.noasistio {
+            background-color: #ffc107;
+            /* amarillo */
+            color: black;
+        }
+
+        .estado-btn.justificado {
+            background-color: #0d6efd;
+            /* azul */
+            color: white;
+        }
+
+        /* Estado no seleccionado */
+        .estado-btn.neutro {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+    </style>
     <!-- Título -->
     <h2 class="fw-bold mb-1">Asistencia</h2>
     <p class="text-muted mb-4">Realizar Asistencia de los estudiantes</p>
@@ -110,13 +144,33 @@
 
                                 <td>{{ $item->estudiante->persona->correo }}</td>
 
-                                <td>
-                                    <select class="form-select w-auto mx-auto"
-                                        wire:model.live="asistencia.{{ $item->id }}">
-                                        @foreach ($tipoasistencias as $tipo)
-                                            <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
-                                        @endforeach
-                                    </select>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        {{-- PRESENTE --}}
+                                        <button type="button"
+                                            class="btn estado-btn
+    @if (($asistencia[$item->id] ?? null) == 40) asistio @else neutro @endif"
+                                            wire:click="asistenciaSet({{ $item->id }}, 40)">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Presente
+                                        </button>
+
+                                        {{-- AUSENTE --}}
+                                        <button type="button"
+                                            class="btn estado-btn
+    @if (($asistencia[$item->id] ?? null) == 41) noasistio @else neutro @endif"
+                                            wire:click="asistenciaSet({{ $item->id }}, 41)">
+                                            <i class="bi bi-x-circle-fill me-1"></i> Ausente
+                                        </button>
+
+                                        {{-- JUSTIFICADO --}}
+                                        <button type="button"
+                                            class="btn estado-btn
+    @if (($asistencia[$item->id] ?? null) == 42) justificado @else neutro @endif"
+                                            wire:click="asistenciaSet({{ $item->id }}, 42)">
+                                            <i class="bi bi-file-earmark-text-fill me-1"></i> Justificado
+                                        </button>
+
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -155,9 +209,58 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL: NO HAY CURSO ABIERTO -->
+    <div wire:ignore.self class="modal fade" id="modalSinCurso" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Curso no disponible
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body text-center py-4">
+                    <p class="mb-2 fw-semibold">
+                        No hay ningún curso abierto en este horario.
+                    </p>
+                    <p class="text-muted mb-0">
+                        Verifique el horario seleccionado o espere el inicio de la clase.
+                    </p>
+                </div>
+
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+                        Entendido
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </section>
 <script>
     document.addEventListener('livewire:initialized', () => {
+
+        // ✅ Listener ÚNICO y reutilizable
+        window.addEventListener('abrir-modal', (event) => {
+
+            const modalId = event.detail.id;
+            if (!modalId) return;
+
+            const modalEl = document.getElementById(modalId);
+            if (!modalEl) {
+                console.warn(`Modal no encontrado: ${modalId}`);
+                return;
+            }
+
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        });
 
         // Cerrar los modales al recibir el evento
         Livewire.on('cerrarModal', () => {

@@ -35,6 +35,11 @@ class Estudiante extends Model
         });
     }
 
+    public function getEstadoTextoAttribute()
+    {
+        return $this->estado == 1 ? 'ACTIVO' : 'INACTIVO';
+    }
+
     public function persona()
     {
         return $this->belongsTo(Persona::class);
@@ -43,5 +48,33 @@ class Estudiante extends Model
     public function carrera()
     {
         return $this->belongsTo(Carrera::class);
+    }
+
+    public function scopeSearch($query, $valor, $carrera_id, $estado)
+    {
+        return $query
+            ->when(
+                $estado !== '' && $estado !== null,
+                fn($q) =>
+                $q->where('estado', $estado)
+            )
+            ->when(
+                $carrera_id !== '' && $carrera_id !== null,
+                fn($q) =>
+                $q->where('carrera_id', $carrera_id)
+            )
+            ->when(
+                $valor !== '' && $valor !== null,
+                fn($q) =>
+                $q->where(function ($sub) use ($valor) {
+                    $sub->whereHas('persona', function ($p) use ($valor) {
+                        $p->where('nombre', 'like', "%{$valor}%")
+                            ->orWhere('apellido_paterno', 'like', "%{$valor}%")
+                            ->orWhere('apellido_materno', 'like', "%{$valor}%")
+                            ->orWhere('dni', 'like', "%{$valor}%");
+                    })
+                        ->orWhere('codigo', 'like', "%{$valor}%");
+                })
+            );
     }
 }

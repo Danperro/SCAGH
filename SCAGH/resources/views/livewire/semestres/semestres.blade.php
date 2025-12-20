@@ -9,15 +9,28 @@
         <!-- 🔹 Fila 1: Buscar, Ciclo, Botones -->
         <div class="row g-3 align-items-end">
 
-            <!-- Buscar -->
-            <div class="col-12 col-md-5">
+            <!-- BUSCAR -->
+            <div class="col-12 col-md-4">
                 <label class="form-label fw-semibold">Buscar</label>
-                <input class="form-control" type="text" wire:model.live.debounce.500ms="query"
+                <input type="text" class="form-control" wire:model.live.debounce.500ms="query"
                     placeholder="Buscar semestre...">
             </div>
 
+            <!-- FECHA INICIO -->
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Desde</label>
+                <input type="date" class="form-control" wire:model.live="filtroFechaInicio">
+            </div>
+
+            <!-- FECHA FIN -->
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Hasta</label>
+                <input type="date" class="form-control" wire:model.live="filtroFechaFin">
+            </div>
+
+
             <!-- Botones -->
-            <div class="col-12 col-md-4 d-flex flex-column flex-md-row gap-2">
+            <div class="col-12 col-md-2 d-flex flex-column gap-2">
                 <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalCrearSemestre"
                     wire:click="limpiar">
                     + Crear Semestre
@@ -38,7 +51,7 @@
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
-                    <tr class="text-centered">
+                    <tr class="text-center">
                         <th scope="col">Nombre</th>
                         <th scope="col">Fecha Inicio</th>
                         <th scope="col">Fecha Fin</th>
@@ -48,12 +61,16 @@
                 </thead>
                 <tbody>
                     @foreach ($semestres as $semestre)
-                        <tr>
+                        <tr class="text-center">
                             <td>{{ $semestre->nombre }}</td>
-                            <td>{{ $semestre->fecha_inicio }}</td>
-                            <td>{{ $semestre->fecha_fin }}</td>
-                            <td>{{ $semestre->estado ? 'Activo' : 'Inactivo' }}</td>
-                            <td>
+                            <td>{{ optional(\Carbon\Carbon::parse($semestre->fecha_inicio))->format('d/m/Y') }}</td>
+                            <td>{{ optional(\Carbon\Carbon::parse($semestre->fecha_fin))->format('d/m/Y') }}</td>
+                            <td class="text-center">
+                                <span class="badge {{ $semestre->estado ? 'bg-success' : 'bg-danger' }}">
+                                    {{ $semestre->estado_texto }}
+                                </span>
+                            </td>
+                            <td class="text-center">
                                 <button class="btn btn-warning btn-sm" wire:click="selectInfo({{ $semestre->id }})"
                                     data-bs-toggle="modal" data-bs-target="#modalEditarSemestre">
                                     <i class="bi bi-pencil-square"></i>
@@ -73,7 +90,7 @@
     <!-- MODAL DE CREAR SEMESTRE -->
     <div wire:ignore.self class="modal fade" id="modalCrearSemestre" tabindex="-1" aria-labelledby="modalCrearSemestre"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered ">
             <form wire:submit.prevent="CrearSemestre" class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title fw-bold" id="modalCrearSemestreLabel">Crear Semestre</h5>
@@ -83,7 +100,7 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <!-- INPUT NOMBRE -->
-                        <div class="col-12 col-md-5">
+                        <div class="col-12 col-md-12">
                             <label class="form-label fw-semibold @error('nombre') is-invalid @enderror">Nombre del
                                 Semestre</label>
                             <input type="text" class="form-control" wire:model.live="nombre"
@@ -94,36 +111,26 @@
                         </div>
 
                         <!-- INPUT FECHA INICIO -->
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-12">
                             <label class="form-label fw-semibold @error('fecha_inicio') is-invalid @enderror">Fecha de
                                 Inicio</label>
-                            <input type="datetime-local" class="form-control" wire:model.live="fecha_inicio">
+                            <input type="date" class="form-control" wire:model.live="fecha_inicio">
                             @error('fecha_inicio')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <!-- INPUT FECHA FIN -->
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-12">
                             <label class="form-label fw-semibold @error('fecha_fin') is-invalid @enderror">Fecha de
                                 Fin</label>
-                            <input type="datetime-local" class="form-control" wire:model.live="fecha_fin">
+                            <input type="date" class="form-control" wire:model.live="fecha_fin">
                             @error('fecha_fin')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <!-- SELECT ESTADO -->
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Estado</label>
-                            <select class="form-select @error('estado') is-invalid @enderror" wire:model.live="estado">
-                                <option value="1">Activo</option>
-                                <option value="0">Inactivo</option>
-                            </select>
-                            @error('estado')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -139,7 +146,7 @@
 
     <!-- MODAL DE EDITAR SEMESTRE -->
     <div wire:ignore.self class="modal fade" id="modalEditarSemestre" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered">
             <form wire:submit.prevent="EditarSemestre" class="modal-content">
 
                 <div class="modal-header">
@@ -150,7 +157,7 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <!-- INPUT NOMBRE -->
-                        <div class="col-12 col-md-5">
+                        <div class="col-12 col-md-12">
                             <label class="form-label fw-semibold @error('nombre') is-invalid @enderror">Nombre del
                                 Semestre</label>
                             <input type="text" class="form-control" wire:model.live="nombre"
@@ -161,37 +168,26 @@
                         </div>
 
                         <!-- INPUT FECHA INICIO -->
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-12">
                             <label class="form-label fw-semibold @error('fecha_inicio') is-invalid @enderror">Fecha de
                                 Inicio</label>
-                            <input type="datetime-local" class="form-control" wire:model.live="fecha_inicio">
+                            <input type="date" class="form-control" wire:model.live="fecha_inicio">
                             @error('fecha_inicio')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <!-- INPUT FECHA FIN -->
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-md-12">
                             <label class="form-label fw-semibold @error('fecha_fin') is-invalid @enderror">Fecha de
                                 Fin</label>
-                            <input type="datetime-local" class="form-control" wire:model.live="fecha_fin">
+                            <input type="date" class="form-control" wire:model.live="fecha_fin">
                             @error('fecha_fin')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <!-- SELECT ESTADO -->
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Estado</label>
-                            <select class="form-select @error('estado') is-invalid @enderror"
-                                wire:model.live="estado">
-                                <option value="1">Activo</option>
-                                <option value="0">Inactivo</option>
-                            </select>
-                            @error('estado')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
+
                     </div>
                 </div>
 
@@ -227,5 +223,58 @@
             </div>
         </div>
     </div>
+    
+    <!-- TOAST DE GENERAL -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+        <div id="toastGeneral" class="toast align-items-center text-white fw-bold border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body" id="toastGeneralTexto">
 
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
 </section>
+<script>
+    document.addEventListener('livewire:initialized', () => {
+
+        // Cerrar los modales al recibir el evento
+        Livewire.on('cerrarModal', () => {
+            // Obtener todos los modales visibles en la página
+            const modales = document.querySelectorAll('.modal.show');
+
+            modales.forEach(modal => {
+                const instancia = bootstrap.Modal.getInstance(modal);
+
+                // Si no existe instancia (ej. primer uso), la creamos
+                const modalBootstrap = instancia ?? new bootstrap.Modal(modal);
+
+                modalBootstrap.hide();
+            });
+        });
+
+        // Toast general
+        Livewire.on('toast-general', ({
+            mensaje,
+            tipo
+        }) => {
+            const toast = document.getElementById('toastGeneral');
+
+            // Limpia clases previas
+            toast.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+
+            // Agrega la clase según el tipo
+            toast.classList.add(`bg-${tipo}`);
+
+            // Cambia el texto
+            document.getElementById('toastGeneralTexto').innerText = mensaje;
+
+            // Muestra el toast
+            const toastShow = new bootstrap.Toast(toast);
+            toastShow.show();
+        });
+
+    });
+</script>

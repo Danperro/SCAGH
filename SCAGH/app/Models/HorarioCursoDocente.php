@@ -53,4 +53,16 @@ class HorarioCursoDocente extends Model
     {
         return $this->belongsTo(Catalogo::class, 'semana_id');
     }
+    
+    public function curso()
+    {
+        return $this->hasOneThrough(
+            Curso::class,
+            DocenteCurso::class,
+            'id',            // DocenteCurso.id
+            'id',            // Curso.id
+            'docente_curso_id',
+            'curso_id'
+        );
+    }
 }

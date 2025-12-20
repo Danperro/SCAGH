@@ -15,44 +15,33 @@ class Cursos extends Component
     public $filtrocurso_id, $filtrociclo_id, $filtrocarrera_id, $filtrofacultad_id, $query;
     public $curso_id, $nombre, $codigo, $ciclo_id, $carrera_id, $facultad_id;
 
-    public $editando = false;
-    public $carrerasFiltro = []; // Para los filtros de la tabla
+    public $carrerasFiltro = []; 
+    public $carreras = [];
 
-    public function mount()
-    {
-
-        $this->carrerasFiltro = Carrera::all();
-    }
+   
     public function updatedFacultadId($value)
     {
         if (!empty($value)) {
-            Carrera::where('facultad_id', $value)->get();
+            $this->carreras = Carrera::where('facultad_id', $value)->get();
         } else {
-            Carrera::all();
+            $this->carreras = Carrera::all();
         }
 
-        // Solo borrar carrera_id cuando NO estamos editando
-        if (!$this->editando) {
-            $this->carrera_id = '';
-        }
+        $this->carrera_id = '';
     }
 
     public function selectInfo($id)
     {
-        $this->editando = true;
+
         $curso = Curso::findOrFail($id);
 
         $this->curso_id = $curso->id;
-        // 1) Buscar la carrera del curso
         $carrera = Carrera::find($curso->carrera_id);
 
-        // 2) Primero: facultad + lista de carreras correctas
-
         $this->facultad_id = $carrera->facultad_id;
-        $carrera = Carrera::where('facultad_id', $carrera->facultad_id)->get();
 
+        $this->carreras = Carrera::where('facultad_id', $this->facultad_id)->get();
 
-        // 3) Recién al final: carrera seleccionada
         $this->carrera_id = $curso->carrera_id;
         $this->ciclo_id   = $curso->ciclo_id;
         $this->nombre     = $curso->nombre;
@@ -65,7 +54,7 @@ class Cursos extends Component
         $this->reset(['facultad_id', 'carrera_id', 'ciclo_id', 'nombre', 'codigo', 'query']);
         $this->reset(['filtrofacultad_id', 'filtrocarrera_id', 'filtrociclo_id']);
 
-        $this->editando = false;
+
         $this->resetValidation();
     }
 
@@ -77,8 +66,7 @@ class Cursos extends Component
         } else {
             $this->carrerasFiltro  = carrera::all();
         }
-        $this->filtrocarrera_id = ''; // <-- AGREGAR ESTO
-        $this->resetPage();
+        $this->filtrocarrera_id = ''; 
     }
 
 
@@ -147,14 +135,14 @@ class Cursos extends Component
     public function render()
     {
         $facultades = catalogo::where('padre_id', 4)->get();
-        $carreras = Carrera::get();
         $cursos = Curso::with(['carrera', 'ciclo'])
             ->search($this->query, $this->filtrocarrera_id, $this->filtrofacultad_id, $this->filtrociclo_id)
             ->get();
         $ciclos = catalogo::where('padre_id', 13)->get();
+
         return view('livewire.cursos.cursos', [
             'facultades' => $facultades,
-            'carreras' => $carreras,
+            'carreras' => $this->carreras,
             'carrerasFiltro' => $this->carrerasFiltro,
             'cursos' => $cursos,
             'ciclos' => $ciclos

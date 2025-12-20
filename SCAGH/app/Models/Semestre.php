@@ -35,5 +35,33 @@ class Semestre extends Model
         });
     }
 
-    // Aquí agregarás relaciones cuando tengas tablas que dependan del semestre
+    public function getEstadoTextoAttribute()
+    {
+        return $this->estado == 1 ? 'ACTIVO' : 'INACTIVO';
+    }
+
+    public function scopeSearch(
+        $query,
+        $busqueda = null,
+        $estado = null,
+        $fecha_inicio = null,
+        $fecha_fin = null
+    ) {
+        return $query
+            ->when($busqueda, function ($q) use ($busqueda) {
+                $q->where('nombre', 'like', "%{$busqueda}%");
+            })
+
+            ->when($estado !== null && $estado !== '', function ($q) use ($estado) {
+                $q->where('estado', $estado);
+            })
+
+            ->when($fecha_inicio, function ($q) use ($fecha_inicio) {
+                $q->whereDate('fecha_inicio', '>=', $fecha_inicio);
+            })
+
+            ->when($fecha_fin, function ($q) use ($fecha_fin) {
+                $q->whereDate('fecha_fin', '<=', $fecha_fin);
+            });
+    }
 }

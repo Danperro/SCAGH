@@ -37,7 +37,7 @@ class Horario extends Model
 
     public function laboratorio()
     {
-        return $this->belongsTo(Catalogo::class, 'laboratorio_id');
+        return $this->belongsTo(Laboratorio::class, 'laboratorio_id');
     }
 
     public function semestre()

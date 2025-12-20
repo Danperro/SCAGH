@@ -11,20 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('estudiante_curso', function (Blueprint $table) {
+        Schema::create('estudiante_curso_docente', function (Blueprint $table) {
             $table->id();
 
             // Estudiante FK
             $table->unsignedBigInteger('estudiante_id');
-            $table->foreign('estudiante_id')->references('id')->on('estudiante');
+            $table->foreign('estudiante_id')
+                ->references('id')
+                ->on('estudiante')
+                ->onDelete('cascade');
 
-            // Curso FK
-            $table->unsignedBigInteger('curso_id');
-            $table->foreign('curso_id')->references('id')->on('curso');
+            // 🔹 DocenteCurso FK (NO curso_id)
+            $table->unsignedBigInteger('docente_curso_id');
+            $table->foreign('docente_curso_id')
+                ->references('id')
+                ->on('docente_curso')
+                ->onDelete('cascade');
 
-            // Semestre FK (siempre necesario)
+            // Semestre FK (si lo quieres explícito)
             $table->unsignedBigInteger('semestre_id');
-            $table->foreign('semestre_id')->references('id')->on('semestre');
+            $table->foreign('semestre_id')
+                ->references('id')
+                ->on('semestre')
+                ->onDelete('cascade');
 
             // Estado 1 = activo, 0 = retirado
             $table->boolean('estado')->default(true);
@@ -44,6 +53,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('estudiante_curso');
+        Schema::dropIfExists('estudiante_curso_docente');
     }
 };

@@ -66,7 +66,7 @@ class Docentes extends Component
 
             'telefono' => [
                 'required',
-                'regex:/^9\d{8}$/', // empieza con 9 y tiene 9 dígitos
+                'regex:/^9\d{8}$/', 
             ],
 
             'correo' => [
@@ -309,7 +309,6 @@ class Docentes extends Component
 
         $cursosOcupados = DocenteCurso::where('semestre_id', $semestreVigente->id)
             ->when($this->docente_id, function ($q) {
-                // Excluir al docente actual del filtro
                 $q->where('docente_id', '!=', $this->docente_id);
             })
             ->pluck('curso_id');
@@ -344,7 +343,6 @@ class Docentes extends Component
         $this->validate($this->rulesAsignacionCurso());
         try {
             foreach ($this->gruposSeleccionados as $grupoId) {
-                // si ya existiera esa combinación, no la duplica
                 DocenteCurso::firstOrCreate(
                     [
                         'docente_id'  => $this->docente_id,
@@ -371,30 +369,27 @@ class Docentes extends Component
         $docentes = Docente::with('persona')
             ->search($this->query, $this->filtroespecialidad_id, $this->filtroestado)
             ->orderBy('id', 'desc')
-            ->paginate(10);
+            ->paginate(20);
 
         $especialidades = Catalogo::where('padre_id', 26)->get();
 
 
-        // Semestre vigente (ej. 2025-II)
         $semestreVigente = Semestre::where('fecha_inicio', '<=', $fechaActual)
             ->where('fecha_fin', '>=', $fechaActual)
             ->first();
 
-        // Combo de semestre (normalmente 1)
+
         $semestres = $semestreVigente ? collect([$semestreVigente]) : collect();
 
 
-        // Ajusta este filtro al que uses para GRUPOS en tu catálogo
-        $grupos = Catalogo::where('padre_id', 36)->get(); // <-- cambia 999 por el padre_id de "Grupos"
+        $grupos = Catalogo::where('padre_id', 36)->get();
         $facultades = catalogo::where('padre_id', 4)->get();
 
-        // Si aún no se ha elegido facultad/carrera, inicializamos
         if (empty($this->carreras)) {
             $this->carreras = Carrera::all();
         }
 
-        // ===== ASIGNACIONES DEL DOCENTE EN EL SEMESTRE ACTUAL =====
+
         if ($this->docente_id && $semestreVigente) {
             $this->asignacionesDocente = DocenteCurso::with(['curso', 'semestre', 'grupo'])
                 ->where('docente_id', $this->docente_id)
@@ -402,7 +397,7 @@ class Docentes extends Component
                 ->orderBy('id', 'desc')
                 ->get();
         } else {
-            $this->asignacionesDocente = collect(); // vacío cuando no hay docente seleccionado
+            $this->asignacionesDocente = collect();
         }
 
         return view('livewire.docentes.docentes', [

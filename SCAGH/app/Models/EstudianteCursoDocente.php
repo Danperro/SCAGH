@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-class EstudianteCurso extends Model
+class EstudianteCursoDocente extends Model
 {
-    protected $table = 'estudiante_curso';
+    // Nombre de la tabla REAL en la BD
+    protected $table = 'estudiante_curso_docente';
 
     protected $fillable = [
         'estudiante_id',
-        'curso_id',
+        'docente_curso_id',
         'semestre_id',
         'estado',
         'fecha_cr',
@@ -40,9 +41,10 @@ class EstudianteCurso extends Model
         return $this->belongsTo(Estudiante::class);
     }
 
-    public function curso()
+    // 🔹 AQUÍ VA LA RELACIÓN CORRECTA
+    public function docenteCurso()
     {
-        return $this->belongsTo(Curso::class);
+        return $this->belongsTo(DocenteCurso::class, 'docente_curso_id');
     }
 
     public function semestre()

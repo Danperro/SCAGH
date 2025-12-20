@@ -47,7 +47,12 @@ class Curso extends Model
         return $this->belongsTo(Catalogo::class, 'ciclo_id');
     }
 
-    public function scopeSearch($query, $busqueda, $carrera_id, $facultad_id,$ciclo_id)
+    public function getEstadoTextoAttribute()
+    {
+        return $this->estado == 1 ? 'ACTIVO' : 'INACTIVO';
+    }
+
+    public function scopeSearch($query, $busqueda, $carrera_id, $facultad_id, $ciclo_id)
     {
         if ($busqueda) {
             $query->where(
@@ -64,8 +69,8 @@ class Curso extends Model
         if ($facultad_id) {
             $query->whereRelation('carrera', 'facultad_id', $facultad_id);
         }
-        if($ciclo_id){
-            $query->where('ciclo_id',$ciclo_id);
+        if ($ciclo_id) {
+            $query->where('ciclo_id', $ciclo_id);
         }
 
         return $query;

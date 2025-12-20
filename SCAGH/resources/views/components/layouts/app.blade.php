@@ -325,7 +325,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="/Asistencia" class="nav-link text-white d-flex align-items-center gap-2">
+                            <a href="/Asistencias" class="nav-link text-white d-flex align-items-center gap-2">
                                 <i class="bi bi-clipboard-check"></i> Realizar Asistencia
                             </a>
                         </li>
@@ -371,12 +371,13 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li>{{-- <form action="{{ route('logout') }}" method="POST">
-    @csrf
-    <button type="submit" class="dropdown-item">
-        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
-    </button>
-</form> --}}
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </div>

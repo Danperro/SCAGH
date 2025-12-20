@@ -49,4 +49,5 @@ class AsistenciaEstudiante extends Model
     {
         return $this->belongsTo(Catalogo::class, 'tipo_asistencia_id');
     }
+    
 }
