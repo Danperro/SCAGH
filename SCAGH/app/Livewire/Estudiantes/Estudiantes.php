@@ -19,6 +19,7 @@ use Livewire\WithPagination;
 class Estudiantes extends Component
 {
     use WithPagination;
+    protected $paginationTheme = 'bootstrap';
     public $estudiante_id, $persona_id, $nombre, $apellido_paterno, $apellido_materno, $dni, $telefono, $correo, $fecha_nacimiento, $codigo;
 
     public $facultad_id, $semestre_id, $carreras = [], $carrera_id, $cursos = [], $curso_id, $grupo_id, $grupos = [], $estudiante_curso_docente_id;
@@ -468,7 +469,7 @@ class Estudiantes extends Component
 
         $fechaActual = now();
         $semestres = Semestre::where('fecha_inicio', '<=', $fechaActual)
-            ->where('fecha_fin', '>=', $fechaActual)->get();
+            ->where('fecha_fin', '>=', $fechaActual)->paginate(10);
 
         $estudiantesCursosDocentes = EstudianteCursoDocente::where('estudiante_id', $this->estudiante_id)->where('estado', 1)->get();
         return view('livewire.estudiantes.estudiantes', [

@@ -66,18 +66,40 @@
             <div class="row text-center">
 
                 <!-- CURSO -->
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="d-flex flex-column align-items-center">
                         <div class="p-2 rounded-circle mb-1" style="background: #e6fff3;">
-                            <i class="bi bi-person-fill fs-4 text-success"></i>
+                            <i class="bi bi-book-fill fs-4 text-success"></i>
                         </div>
                         <p class="text-muted mb-0">Curso</p>
                         <h6 class="fw-semibold">{{ $curso }}</h6>
                     </div>
                 </div>
 
+                <!-- CARRERA -->
+                <div class="col-md-2">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="p-2 rounded-circle mb-1" style="background: #e6fff3;">
+                            <i class="bi bi-diagram-3-fill fs-4 text-success"></i>
+                        </div>
+                        <p class="text-muted mb-0">Carrera</p>
+                        <h6 class="fw-semibold">{{ $carrera }}</h6>
+                    </div>
+                </div>
+
+                <!-- FACULTAD -->
+                <div class="col-md-2">
+                    <div class="d-flex flex-column align-items-center">
+                        <div class="p-2 rounded-circle mb-1" style="background: #e6fff3;">
+                            <i class="bi bi-building fs-4 text-success"></i>
+                        </div>
+                        <p class="text-muted mb-0">Facultad</p>
+                        <h6 class="fw-semibold">{{ $facultad }}</h6>
+                    </div>
+                </div>
+
                 <!-- DOCENTE -->
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="d-flex flex-column align-items-center">
                         <div class="p-2 rounded-circle mb-1" style="background: #e6fff3;">
                             <i class="bi bi-mortarboard-fill fs-4 text-success"></i>
@@ -88,7 +110,7 @@
                 </div>
 
                 <!-- FECHA -->
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="d-flex flex-column align-items-center">
                         <div class="p-2 rounded-circle mb-1" style="background: #e6fff3;">
                             <i class="bi bi-calendar-event-fill fs-4 text-success"></i>
@@ -99,7 +121,7 @@
                 </div>
 
                 <!-- HORARIO -->
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="d-flex flex-column align-items-center">
                         <div class="p-2 rounded-circle mb-1" style="background: #e6fff3;">
                             <i class="bi bi-clock-fill fs-4 text-success"></i>
@@ -113,6 +135,7 @@
 
         </div>
     @endif
+
 
 
     <!-- Tabla de Estudiantes registrados en ese curso -->

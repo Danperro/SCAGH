@@ -62,7 +62,6 @@ class AuthController extends Controller
 
     public function sendResetLink(Request $request)
     {
-        // ✅ Validación en español (rules + messages)
         $rules = [
             'email' => ['required', 'email'],
         ];
@@ -80,7 +79,6 @@ class AuthController extends Controller
 
         $status = Password::sendResetLink($request->only('email'));
 
-        // ✅ Traducción manual del status (sin archivos lang)
         $statusEs = match ($status) {
             Password::RESET_LINK_SENT => 'Te hemos enviado el enlace para restablecer tu contraseña.',
             Password::INVALID_USER    => 'No encontramos un usuario con ese correo.',
@@ -103,7 +101,7 @@ class AuthController extends Controller
 
     public function resetPassword(Request $request)
     {
-        // ✅ Validación en español (rules + messages)
+
         $rules = [
             'token' => ['required'],
             'email' => ['required', 'email'],
@@ -138,7 +136,7 @@ class AuthController extends Controller
             }
         );
 
-        // ✅ Traducción manual del status
+
         $statusEs = match ($status) {
             Password::PASSWORD_RESET => 'Tu contraseña fue restablecida correctamente.',
             Password::INVALID_TOKEN  => 'El enlace de restablecimiento es inválido o ya expiró.',

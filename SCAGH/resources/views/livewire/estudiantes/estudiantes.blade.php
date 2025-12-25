@@ -1,11 +1,34 @@
 <section class="container-fluid py-4">
 
+    {{-- HEADER --}}
+    <div class="row g-3 align-items-center mb-4">
 
-    <!-- Título -->
-    <h2 class="fw-bold mb-1">Estudiantes</h2>
-    <p class="text-muted mb-4">Gestión de estudiantes</p>
+        <div class="col-12 col-md-8">
+            <div
+                class="d-flex align-items-center gap-2 justify-content-center justify-content-md-start text-center text-md-start">
+                <i class="bi bi-mortarboard fs-3 text-success"></i>
+                <div>
+                    <h3 class="fw-bold mb-0">LISTADO DE ESTUDIANTES</h3>
+                    <small class="text-muted">Gestión de Estudiantes y asignacion de cursos</small>
+                </div>
+            </div>
+        </div>
 
-    
+        <div class="col-12 col-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-center justify-content-md-end gap-2">
+                <button class="btn btn-success" type="button" data-bs-toggle="modal"
+                    data-bs-target="#modalCrearEstudiante" wire:click="limpiar">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo Estudiante
+                </button>
+
+                <button class="btn btn-outline-success" type="button" wire:click="limpiar">
+                    <i class="bi bi-eraser me-1"></i> Limpiar Filtros
+                </button>
+            </div>
+        </div>
+
+    </div>
+
     <!-- Filtros -->
     <div class="card mb-4 shadow-sm p-4">
         <div class="row g-3 align-items-end">
@@ -41,62 +64,70 @@
                     <option value="0">Inactivo</option>
                 </select>
             </div>
-            <!-- Botón Crear Estudiante -->
-            <div class="col-12 col-md-2 d-flex flex-column gap-2">
-                <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalCrearEstudiante"
-                    wire:click="limpiar">+ Crear Estudiante</button>
 
-                <button class="btn btn-outline-success w-100" wire:click="limpiar">
-                    Limpiar filtros</button>
-            </div>
         </div>
     </div>
 
 
     <!-- Tabla de Estudiantes -->
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr class="text-center">
-                        <th scope="col">Estudiante</th>
-                        <th scope="col">Codigo</th>
-                        <th scope="col">Carrera</th>
-                        <th scope="col">Estado</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($estudiantes as $estudiante)
-                        <tr>
-                            <td>{{ $estudiante->persona->nombre . ' ' . $estudiante->persona->apellido_paterno . ' ' . $estudiante->persona->apellido_materno }}
-                            </td>
-                            <td>{{ $estudiante->codigo }}</td>
-                            <td>{{ $estudiante->carrera->nombre }}</td>
-                            <td class="text-center">
-                                <span class="badge {{ $estudiante->estado ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $estudiante->estado_texto }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-info btn-sm" wire:click="selectInfo({{ $estudiante->id }})"
-                                    data-bs-toggle="modal" data-bs-target="#modalAsignarCurso">
-                                    <i class="bi bi-journal-bookmark"></i>
-                                </button>
-                                <button class="btn btn-warning btn-sm" wire:click="selectInfo({{ $estudiante->id }})"
-                                    data-bs-toggle="modal" data-bs-target="#modalEditarEstudiante">
-                                    <i class="bi bi-pencil-square"></i></button>
-
-                                <button class="btn btn-danger btn-sm" wire:click="selectInfo({{ $estudiante->id }})"
-                                    data-bs-toggle="modal" data-bs-target="#modalEliminarEstudiante">
-                                    <i class="bi bi-trash"></i></button>
-                            </td>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="text-center">
+                            <th scope="col">Estudiante</th>
+                            <th scope="col">Codigo</th>
+                            <th scope="col">Carrera</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Acciones</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse ($estudiantes as $estudiante)
+                            <tr>
+                                <td>{{ $estudiante->persona->nombre . ' ' . $estudiante->persona->apellido_paterno . ' ' . $estudiante->persona->apellido_materno }}
+                                </td>
+                                <td>{{ $estudiante->codigo }}</td>
+                                <td>{{ $estudiante->carrera->nombre }}</td>
+                                <td class="text-center">
+                                    <span class="badge {{ $estudiante->estado ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $estudiante->estado_texto }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-info btn-sm" wire:click="selectInfo({{ $estudiante->id }})"
+                                        data-bs-toggle="modal" data-bs-target="#modalAsignarCurso">
+                                        <i class="bi bi-journal-bookmark"></i>
+                                    </button>
+                                    <button class="btn btn-warning btn-sm"
+                                        wire:click="selectInfo({{ $estudiante->id }})" data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarEstudiante">
+                                        <i class="bi bi-pencil-square"></i></button>
+
+                                    <button class="btn btn-danger btn-sm"
+                                        wire:click="selectInfo({{ $estudiante->id }})" data-bs-toggle="modal"
+                                        data-bs-target="#modalEliminarEstudiante">
+                                        <i class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                    No hay estudiantes registrados.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-3">
+                {{ $estudiantes->links() }}
+            </div>
         </div>
     </div>
+
 
 
     <!-- Modal Crear Estudiante -->
@@ -106,7 +137,9 @@
             <form wire:submit.prevent="CrearEstudiante" class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Crear Estudiante</h5>
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-plus-circle me-2 text-success"></i>Registrar Estudiante
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"></button>
                 </div>
 
@@ -134,7 +167,8 @@
                         <!-- CARRERA -->
                         <div class="row g-3 mt-1">
                             <div class="col-md-12">
-                                <label for="carreraSelect" class="form-label">Seleccionar Carrera</label>
+                                <label for="carreraSelect" class="form-label">Carrera<span
+                                        class="text-danger">*</span></label>
                                 <select class="form-select" id="carreraSelect" wire:model.live="carrera_id"
                                     @disabled(!$facultad_id) @error('carrera_id') is-invalid @enderror>
                                     <option value="" hidden>Seleccione</option>
@@ -150,7 +184,8 @@
 
                         <!-- CÓDIGO -->
                         <div class="col-md-4">
-                            <label class="form-label">Codigo de Estudiante</label>
+                            <label for="codigoEstudiante" class="form-label">Codigo de Estudiante<span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('codigo') is-invalid @enderror"
                                 wire:model.live="codigo">
                             @error('codigo')
@@ -160,7 +195,7 @@
 
                         <!-- DNI -->
                         <div class="col-md-4">
-                            <label class="form-label">DNI</label>
+                            <label for="dniEstudiante"class="form-label">DNI<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('dni') is-invalid @enderror"
                                 wire:model.live="dni">
                             @error('dni')
@@ -170,7 +205,8 @@
 
                         <!-- NOMBRE -->
                         <div class="col-md-4">
-                            <label class="form-label">Nombre</label>
+                            <label for="nombreEstudiante" class="form-label">Nombre<span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('nombre') is-invalid @enderror"
                                 wire:model.live="nombre">
                             @error('nombre')
@@ -180,7 +216,8 @@
 
                         <!-- APELLIDO PATERNO -->
                         <div class="col-md-4">
-                            <label class="form-label">Apellido Paterno</label>
+                            <label for="apellidoPaternoEstudiante" class="form-label">Apellido Paterno<span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('apellido_paterno') is-invalid @enderror"
                                 wire:model.live="apellido_paterno">
                             @error('apellido_paterno')
@@ -190,7 +227,8 @@
 
                         <!-- APELLIDO MATERNO -->
                         <div class="col-md-4">
-                            <label class="form-label">Apellido Materno</label>
+                            <label for="apellidoMaternoEstudiante" class="form-label">Apellido Materno<span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('apellido_materno') is-invalid @enderror"
                                 wire:model.live="apellido_materno">
                             @error('apellido_materno')
@@ -200,7 +238,8 @@
 
                         <!-- TELEFONO -->
                         <div class="col-md-4">
-                            <label class="form-label">Teléfono</label>
+                            <label for="telefonoEstudiante" class="form-label">Teléfono<span
+                                    class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('telefono') is-invalid @enderror"
                                 wire:model.live="telefono">
                             @error('telefono')
@@ -210,7 +249,8 @@
 
                         <!-- CORREO -->
                         <div class="col-md-4">
-                            <label class="form-label">Correo</label>
+                            <label for="correoEstudiante" class="form-label">Correo<span
+                                    class="text-danger">*</span></label>
                             <input type="email" class="form-control @error('correo') is-invalid @enderror"
                                 wire:model.live="correo">
                             @error('correo')
@@ -220,7 +260,8 @@
 
                         <!-- FECHA NACIMIENTO -->
                         <div class="col-md-4">
-                            <label class="form-label">Fecha de nacimiento</label>
+                            <label for="fechaNacimientoEstudiante" class="form-label">Fecha de nacimiento<span
+                                    class="text-danger">*</span></label>
                             <input type="date" class="form-control @error('fecha_nacimiento') is-invalid @enderror"
                                 wire:model.live="fecha_nacimiento">
                             @error('fecha_nacimiento')
@@ -234,7 +275,7 @@
                     <button class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">Cerrar</button>
 
                     <button type="submit" class="btn btn-success" wire:loading.attr="disabled">
-                        <span wire:loading.remove>Guardar</span>
+                        <span wire:loading.remove><i class="bi bi-check2-circle me-1"></i>Guardar</span>
                         <span wire:loading class="spinner-border spinner-border-sm"></span>
                     </button>
                 </div>
@@ -252,7 +293,9 @@
             <form wire:submit.prevent="EditarEstudiante" class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Editar Estudiante</h5>
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-pencil-square me-2 text-warning"></i>Editar Estudiante
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"></button>
                 </div>
 
@@ -280,7 +323,8 @@
                         <!-- CARRERA -->
                         <div class="row g-3 mt-1">
                             <div class="col-md-12">
-                                <label for="carreraSelect" class="form-label">Seleccionar Carrera</label>
+                                <label for="carreraSelect" class="form-label">Carrera<span
+                                        class="text-danger">*</span></label>
                                 <select class="form-select" id="carreraSelect" wire:model.live="carrera_id"
                                     wire:key="carrera-{{ $facultad_id }}" @disabled(!$facultad_id)
                                     @error('carrera_id') is-invalid @enderror>
@@ -297,7 +341,7 @@
 
                         <!-- CÓDIGO -->
                         <div class="col-md-4">
-                            <label class="form-label">Codigo de Estudiante</label>
+                            <label class="form-label">Codigo de Estudiante<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('codigo') is-invalid @enderror"
                                 wire:model.live="codigo">
                             @error('codigo')
@@ -307,7 +351,7 @@
 
                         <!-- DNI -->
                         <div class="col-md-4">
-                            <label class="form-label">DNI</label>
+                            <label class="form-label">DNI<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('dni') is-invalid @enderror"
                                 wire:model.live="dni">
                             @error('dni')
@@ -317,7 +361,7 @@
 
                         <!-- NOMBRE -->
                         <div class="col-md-4">
-                            <label class="form-label">Nombre</label>
+                            <label class="form-label">Nombre<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('nombre') is-invalid @enderror"
                                 wire:model.live="nombre">
                             @error('nombre')
@@ -327,7 +371,7 @@
 
                         <!-- APELLIDO PATERNO -->
                         <div class="col-md-4">
-                            <label class="form-label">Apellido Paterno</label>
+                            <label class="form-label">Apellido Paterno<span class="text-danger">*</span></label>
                             <input type="text"
                                 class="form-control @error('apellido_paterno') is-invalid @enderror"
                                 wire:model.live="apellido_paterno">
@@ -338,7 +382,7 @@
 
                         <!-- APELLIDO MATERNO -->
                         <div class="col-md-4">
-                            <label class="form-label">Apellido Materno</label>
+                            <label class="form-label">Apellido Materno<span class="text-danger">*</span></label>
                             <input type="text"
                                 class="form-control @error('apellido_materno') is-invalid @enderror"
                                 wire:model.live="apellido_materno">
@@ -349,7 +393,7 @@
 
                         <!-- TELEFONO -->
                         <div class="col-md-4">
-                            <label class="form-label">Teléfono</label>
+                            <label class="form-label">Teléfono<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('telefono') is-invalid @enderror"
                                 wire:model.live="telefono">
                             @error('telefono')
@@ -359,7 +403,7 @@
 
                         <!-- CORREO -->
                         <div class="col-md-4">
-                            <label class="form-label">Correo</label>
+                            <label class="form-label">Correo<span class="text-danger">*</span></label>
                             <input type="email" class="form-control @error('correo') is-invalid @enderror"
                                 wire:model.live="correo">
                             @error('correo')
@@ -369,7 +413,7 @@
 
                         <!-- FECHA NACIMIENTO -->
                         <div class="col-md-4">
-                            <label class="form-label">Fecha de nacimiento</label>
+                            <label class="form-label">Fecha de nacimiento<span class="text-danger">*</span></label>
                             <input type="date"
                                 class="form-control @error('fecha_nacimiento') is-invalid @enderror"
                                 wire:model.live="fecha_nacimiento">
@@ -383,8 +427,8 @@
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">Cerrar</button>
 
-                    <button type="submit" class="btn btn-success" wire:loading.attr="disabled">
-                        <span wire:loading.remove>Guardar</span>
+                    <button type="submit" class="btn btn-warning" wire:loading.attr="disabled">
+                        <span wire:loading.remove> <i class="bi bi-save2 me-1"></i> Guardar cambios</span>
                         <span wire:loading class="spinner-border spinner-border-sm"></span>
                     </button>
                 </div>
@@ -473,7 +517,7 @@
                         <div class="row g-3">
                             <!-- =============== CURSOS =============== -->
                             <div class="col-md-6">
-                                <label class="form-label">Curso</label>
+                                <label class="form-label">Curso<span class="text-danger">*</span></label>
                                 <select class="form-select @error('curso_id') is-invalid @enderror"
                                     wire:model.live="curso_id" wire:key="curso-{{ $carrera_id }}"
                                     @disabled(!$carrera_id)>
@@ -489,7 +533,7 @@
 
                             <!-- GRUPO -->
                             <div class="col-md-6">
-                                <label class="form-label">Seleccionar Grupo</label>
+                                <label class="form-label">Grupo<span class="text-danger">*</span></label>
                                 <select class="form-select @error('grupo_id') is-invalid @enderror"
                                     wire:model.live="grupo_id" wire:key="grupo-{{ $curso_id }}"
                                     @disabled(!$curso_id)>
@@ -509,7 +553,7 @@
 
                             <!-- =============== SEMESTRES =============== -->
                             <div class="col-md-6">
-                                <label class="form-label">Semestre</label>
+                                <label class="form-label">Semestre<span class="text-danger">*</span></label>
                                 <select class="form-select @error('semestre_id') is-invalid @enderror"
                                     wire:model="semestre_id">
                                     <option value="" hidden>Seleccione</option>
@@ -553,8 +597,8 @@
                                         <td>{{ $estudiantesCursosDocentes->docenteCurso->grupo->nombre }}</td>
                                         <td class="text-center">
                                             <button class="btn btn-danger btn-sm"
-                                                wire:click="selectAsignacionCurso({{ $estudiantesCursosDocentes->id }})" data-bs-toggle="modal"
-                                                data-bs-target="#modalEliminarAsignacionCurso">
+                                                wire:click="selectAsignacionCurso({{ $estudiantesCursosDocentes->id }})"
+                                                data-bs-toggle="modal" data-bs-target="#modalEliminarAsignacionCurso">
                                                 <i class="bi bi-trash"></i></button>
                                         </td>
                                     </tr>
@@ -590,7 +634,8 @@
 
                     <div class="d-flex gap-3 mt-4">
                         <button class="btn btn-light flex-fill" data-bs-dismiss="modal">Cancelar</button>
-                        <button class="btn btn-danger flex-fill" wire:click="EliminarAsignacionCurso">Eliminar</button>
+                        <button class="btn btn-danger flex-fill"
+                            wire:click="EliminarAsignacionCurso">Eliminar</button>
                     </div>
 
                 </div>

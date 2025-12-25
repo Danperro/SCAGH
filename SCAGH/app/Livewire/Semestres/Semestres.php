@@ -5,13 +5,16 @@ namespace App\Livewire\Semestres;
 use App\Models\Semestre;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Semestres extends Component
 {
     use WithPagination;
+    protected $paginationTheme = 'bootstrap';
     public $query;
+    #[Url('Busqueda')]
     public $filtroEstado = null;
     public $filtroFechaInicio = null;
     public $filtroFechaFin = null;
@@ -45,7 +48,7 @@ class Semestres extends Component
         'fecha_inicio' => 'required|date',
         'fecha_fin'    => 'required|date|after:fecha_inicio',
     ];
-    
+
     protected $messages = [
         'nombre.required' => 'El nombre del semestre es obligatorio.',
         'nombre.string'   => 'El nombre del semestre debe ser texto.',
@@ -158,7 +161,7 @@ class Semestres extends Component
             $this->filtroFechaFin
         )
             ->orderBy('fecha_inicio', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('livewire.semestres.semestres', [
             'semestres' => $semestres

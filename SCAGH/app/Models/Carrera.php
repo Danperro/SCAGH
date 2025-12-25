@@ -16,6 +16,7 @@ class Carrera extends Model
     protected $fillable = [
         'nombre',
         'facultad_id',
+        'ciclos_total',
         'estado',
         'fecha_cr',
         'usuario_cr',
@@ -36,15 +37,30 @@ class Carrera extends Model
             $model->usuario_md = Auth::id() ?? null;
         });
     }
-    // Relación con la tabla 'catalogo' (facultad)
+
     public function facultad()
     {
         return $this->belongsTo(Catalogo::class, 'facultad_id');
     }
 
-    // Relación con los cursos que pertenecen a esta carrera
+
     public function curso()
     {
         return $this->hasMany(Curso::class);
+    }
+
+    public function scopeSearch($query, $valor = null, $facultadId = null, $estado = null)
+    {
+        return $query
+            ->when($estado !== '' && $estado !== null, function ($q) use ($estado) {
+                $q->where('estado', (int)$estado);
+            })
+            ->when($facultadId !== '' && $facultadId !== null, function ($q) use ($facultadId) {
+                $q->where('facultad_id', (int)$facultadId);
+            })
+            ->when($valor !== '' && $valor !== null, function ($q) use ($valor) {
+                $valor = trim($valor);
+                $q->where('nombre', 'like', "%{$valor}%");
+            });
     }
 }

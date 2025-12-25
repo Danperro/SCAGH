@@ -9,6 +9,7 @@ use App\Models\Docente;
 use App\Models\Persona;
 use App\Models\Semestre;
 use App\Models\DocenteCurso;
+use App\Models\Usuario;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Url;
@@ -17,10 +18,12 @@ use Livewire\WithPagination;
 class Docentes extends Component
 {
     use WithPagination;
+    protected $paginationTheme = 'bootstrap';
     public $docente_id, $persona_id, $nombre, $apellido_paterno, $apellido_materno, $dni, $telefono, $correo, $fecha_nacimiento, $especialidad_id;
     public $query = '', $filtroespecialidad_id, $filtroestado;
     public $asignacionesDocente = [], $gruposSeleccionados = [];
     public $carrera_id, $facultad_id, $curso_id, $carreras = [], $cursos = [], $semestre_id, $gruposAsignadosCursoActual = [];
+    public $email, $password_confirmation, $password, $username, $usuario_id;
 
     #[Url('Busqueda')]
     public function selectInfo($id)
@@ -41,6 +44,7 @@ class Docentes extends Component
         $this->fecha_nacimiento = $docente->persona->fecha_nacimiento;
 
         $this->especialidad_id = $docente->especialidad_id;
+
     }
 
 
@@ -51,6 +55,7 @@ class Docentes extends Component
         $this->reset(['docente_id', 'nombre', 'apellido_paterno', 'apellido_materno', 'dni', 'telefono', 'correo', 'fecha_nacimiento', 'especialidad_id']);
         $this->reset(['query', 'filtroespecialidad_id', 'filtroestado']);
         $this->reset(['carrera_id', 'facultad_id', 'curso_id', 'carreras', 'cursos', 'semestre_id', 'gruposSeleccionados']);
+        $this->reset(['email', 'password_confirmation', 'password', 'username']);
         $this->resetPage();
     }
 
@@ -66,7 +71,7 @@ class Docentes extends Component
 
             'telefono' => [
                 'required',
-                'regex:/^9\d{8}$/', 
+                'regex:/^9\d{8}$/',
             ],
 
             'correo' => [
@@ -75,7 +80,12 @@ class Docentes extends Component
                 'regex:/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(com|pe|edu|es)$/',
                 'unique:persona,correo,' . $this->persona_id,
             ],
-
+            'email' => [
+                'required',
+                'email',
+                'regex:/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(com|pe|edu|es)$/',
+                'unique:usuario,email,' . $this->usuario_id,
+            ],
             'fecha_nacimiento' => [
                 'required',
                 'date',
@@ -174,7 +184,7 @@ class Docentes extends Component
             'semestre_id',
             'gruposSeleccionados',
         ];
-
+        $camposUsuario = ['username', 'email', 'password', 'password_confirmation'];
         if (in_array($campo, $camposDocente)) {
             $this->validateOnly($campo, $this->rulesDocente());
         } elseif (in_array($campo, $camposAsignacion)) {
@@ -254,16 +264,7 @@ class Docentes extends Component
     {
         try {
             $docente = docente::findOrFail($this->docente_id);
-            $persona = $docente->persona;
-
-            // Eliminar usuario
-            //if ($persona->usuario) {
-            //  $persona->usuario->delete();
-            //}
-
-            $docente->delete();
-
-            $persona->delete();
+            $docente->update(['estado' => 0]);
 
             $this->limpiar();
             $this->dispatch('cerrarModal');

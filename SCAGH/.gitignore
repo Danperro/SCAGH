@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+SCAGH/database/migrations/2025_12_18_213453_add_email_to_usuario_table.php
+SCAGH/database/migrations/2025_11_27_190343_create_usuario_table.php
+SCAGH/database/migrations/2025_11_27_190343_create_usuario_table.php

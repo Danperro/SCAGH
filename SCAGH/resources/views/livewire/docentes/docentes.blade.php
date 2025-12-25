@@ -1,14 +1,40 @@
 <section class="container-fluid py-4">
-    <!-- Titulos -->
-    <h2 class="fw-bold mb-1">Docentes</h2>
-    <p class="text-muted mb-4">Gestión de docentes</p>
+
+    {{-- HEADER --}}
+    <div class="row g-3 align-items-center mb-4">
+
+        <div class="col-12 col-md-8">
+            <div
+                class="d-flex align-items-center gap-2 justify-content-center justify-content-md-start text-center text-md-start">
+                <i class="bi bi-mortarboard fs-3 text-success"></i>
+                <div>
+                    <h3 class="fw-bold mb-0">LISTADO DE DOCENTES</h3>
+                    <small class="text-muted">Gestión de Docentres y asignacion de cursos</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="d-flex flex-column flex-md-row justify-content-center justify-content-md-end gap-2">
+                <button class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#modalCrearDocente"
+                    wire:click="limpiar">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo Docente
+                </button>
+
+                <button class="btn btn-outline-success" type="button" wire:click="limpiar">
+                    <i class="bi bi-eraser me-1"></i> Limpiar Filtros
+                </button>
+            </div>
+        </div>
+
+    </div>
 
     <!-- Filtros -->
     <div class="card mb-4 shadow-sm p-4">
 
         <div class="row g-3 align-items-end">
 
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-6">
                 <label class="form-label fw-semibold">Buscar</label>
                 <input class="form-control" type="text" wire:model.live.debounce.500ms="query"
                     placeholder="Bucar docente...">
@@ -33,57 +59,64 @@
                 </select>
             </div>
 
-            <div class="col-12 col-md-2 d-flex flex-column gap-2">
-                <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalCrearDocente"
-                    wire:click="limpiar">+ Crear Docente</button>
-
-                <button class="btn btn-outline-success w-100" wire:click="limpiar">
-                    Limpiar filtros</button>
-            </div>
-
         </div>
     </div>
 
     <!-- Tabla -->
-    <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr class="text-center">
-                        <th scope="col">Docente</th>
-                        <th scope="col">Especialidad</th>
-                        <th scope="col">Estado</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($docentes as $docente)
-                        <tr>
-                            <td>{{ $docente->persona->nombre . ' ' . $docente->persona->apellido_paterno . ' ' . $docente->persona->apellido_materno }}
-                            </td>
-                            <td>{{ $docente->especialidad->nombre }}</td>
-                            <td class="text-center">
-                                <span class="badge {{ $docente->estado ? 'bg-success' : 'bg-danger' }}">
-                                    {{ $docente->estado_texto }}
-                                </span>
-                            </td>
-                            <td class="text-center">
-                                <button class="btn btn-info btn-sm" wire:click="selectInfo({{ $docente->id }})"
-                                    data-bs-toggle="modal" data-bs-target="#modalAsignarCurso">
-                                    <i class="bi bi-journal-bookmark"></i>
-                                </button>
-                                <button class="btn btn-warning btn-sm" wire:click="selectInfo({{ $docente->id }})"
-                                    data-bs-toggle="modal" data-bs-target="#modalEditarDocente">
-                                    <i class="bi bi-pencil-square"></i></button>
-
-                                <button class="btn btn-danger btn-sm" wire:click="selectInfo({{ $docente->id }})"
-                                    data-bs-toggle="modal" data-bs-target="#modalEliminarDocente">
-                                    <i class="bi bi-trash"></i></button>
-                            </td>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="text-center">
+                            <th class="text-start ps-4">Docente</th>
+                            <th scope="col">Especialidad</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Acciones</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse ($docentes as $docente)
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-semibold text-dark">
+                                        {{ $docente->persona->nombre . ' ' . $docente->persona->apellido_paterno . ' ' . $docente->persona->apellido_materno }}
+                                    </div>
+                                </td>
+                                <td class="text-center">{{ $docente->especialidad->nombre }}</td>
+                                <td class="text-center">
+                                    <span class="badge {{ $docente->estado ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $docente->estado_texto }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-info btn-sm" wire:click="selectInfo({{ $docente->id }})"
+                                        data-bs-toggle="modal" data-bs-target="#modalAsignarCurso">
+                                        <i class="bi bi-journal-bookmark"></i>
+                                    </button>
+                                    <button class="btn btn-warning btn-sm" wire:click="selectInfo({{ $docente->id }})"
+                                        data-bs-toggle="modal" data-bs-target="#modalEditarDocente">
+                                        <i class="bi bi-pencil-square"></i></button>
+
+                                    <button class="btn btn-danger btn-sm" wire:click="selectInfo({{ $docente->id }})"
+                                        data-bs-toggle="modal" data-bs-target="#modalEliminarDocente">
+                                        <i class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                    No hay Docentes registrados.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-3">
+                {{ $docentes->links() }}
+            </div>
         </div>
     </div>
 
@@ -94,7 +127,9 @@
             <form wire:submit.prevent="CrearDocente" class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Crear Docente</h5>
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-plus-circle me-2 text-success"></i>Registrar Docente
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"></button>
                 </div>
 
@@ -104,7 +139,7 @@
 
                         <!-- NOMBRE -->
                         <div class="col-md-4">
-                            <label class="form-label">Nombre</label>
+                            <label class="form-label">Nombre<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('nombre') is-invalid @enderror"
                                 wire:model.live="nombre">
                             @error('nombre')
@@ -114,7 +149,7 @@
 
                         <!-- APELLIDO PATERNO -->
                         <div class="col-md-4">
-                            <label class="form-label">Apellido Paterno</label>
+                            <label class="form-label">Apellido Paterno<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('apellido_paterno') is-invalid @enderror"
                                 wire:model.live="apellido_paterno">
                             @error('apellido_paterno')
@@ -124,7 +159,7 @@
 
                         <!-- APELLIDO MATERNO -->
                         <div class="col-md-4">
-                            <label class="form-label">Apellido Materno</label>
+                            <label class="form-label">Apellido Materno<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('apellido_materno') is-invalid @enderror"
                                 wire:model.live="apellido_materno">
                             @error('apellido_materno')
@@ -134,7 +169,7 @@
 
                         <!-- DNI -->
                         <div class="col-md-4">
-                            <label class="form-label">DNI</label>
+                            <label class="form-label">DNI<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('dni') is-invalid @enderror"
                                 wire:model.live="dni">
                             @error('dni')
@@ -144,7 +179,7 @@
 
                         <!-- TELEFONO -->
                         <div class="col-md-4">
-                            <label class="form-label">Teléfono</label>
+                            <label class="form-label">Teléfono<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('telefono') is-invalid @enderror"
                                 wire:model.live="telefono">
                             @error('telefono')
@@ -154,7 +189,7 @@
 
                         <!-- CORREO -->
                         <div class="col-md-4">
-                            <label class="form-label">Correo</label>
+                            <label class="form-label">Correo<span class="text-danger">*</span></label>
                             <input type="email" class="form-control @error('correo') is-invalid @enderror"
                                 wire:model.live="correo">
                             @error('correo')
@@ -164,7 +199,7 @@
 
                         <!-- FECHA NACIMIENTO -->
                         <div class="col-md-6">
-                            <label class="form-label">Fecha de nacimiento</label>
+                            <label class="form-label">Fecha de nacimiento<span class="text-danger">*</span></label>
                             <input type="date" class="form-control @error('fecha_nacimiento') is-invalid @enderror"
                                 wire:model.live="fecha_nacimiento">
                             @error('fecha_nacimiento')
@@ -174,7 +209,7 @@
 
                         <!-- ESPECIALIDAD -->
                         <div class="col-md-6 ">
-                            <label class="form-label">Especialidad</label>
+                            <label class="form-label">Especialidad<span class="text-danger">*</span></label>
                             <select class="form-select  @error('especialidad_id') is-invalid @enderror"
                                 wire:model.live="especialidad_id">
                                 <option hidden value="">Seleccione</option>
@@ -187,15 +222,54 @@
                             @enderror
                         </div>
 
-                    </div>
+                        <!-- USERNAME -->
+                        <div class="col-md-4">
+                            <label class="form-label">Usuario<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('username') is-invalid @enderror"
+                                wire:model.live="username">
+                            @error('username')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
 
+                        <!-- PASSWORD -->
+                        <div class="col-md-4">
+                            <label class="form-label">Contraseña<span class="text-danger">*</span></label>
+                            <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                wire:model.live="password">
+                            @error('password')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- CONFIRMAR PASSWORD -->
+                        <div class="col-md-4">
+                            <label class="form-label">Confirmar Contraseña<span class="text-danger">*</span></label>
+                            <input type="password"
+                                class="form-control @error('password_confirmation') is-invalid @enderror"
+                                wire:model.live="password_confirmation">
+                            @error('password_confirmation')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <!-- CORREO DE RECUPERACION -->
+                        <div class="col-md-4">
+                            <label id="emailLabel" class="form-label">Correo de Recuperacion<span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control @error('email') is-invalid @enderror"
+                                wire:model.live="email">
+                            @error('email')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">Cerrar</button>
 
                     <button type="submit" class="btn btn-success" wire:loading.attr="disabled">
-                        <span wire:loading.remove>Guardar</span>
+                        <span wire:loading.remove><i class="bi bi-check2-circle me-1"></i> Guardar</span>
                         <span wire:loading class="spinner-border spinner-border-sm"></span>
                     </button>
                 </div>
@@ -212,7 +286,9 @@
             <form wire:submit.prevent="EditarDocente" class="modal-content">
 
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Editar Docente</h5>
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-pencil-square me-2 text-warning"></i>Editar Docente
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" wire:click="limpiar"></button>
                 </div>
 
@@ -222,7 +298,7 @@
 
                         <!-- NOMBRE -->
                         <div class="col-md-4">
-                            <label class="form-label">Nombre</label>
+                            <label class="form-label">Nombre<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('nombre') is-invalid @enderror"
                                 wire:model.live="nombre">
                             @error('nombre')
@@ -232,8 +308,9 @@
 
                         <!-- APELLIDO PATERNO -->
                         <div class="col-md-4">
-                            <label class="form-label">Apellido Paterno</label>
-                            <input type="text" class="form-control @error('apellido_paterno') is-invalid @enderror"
+                            <label class="form-label">Apellido Paterno<span class="text-danger">*</span></label>
+                            <input type="text"
+                                class="form-control @error('apellido_paterno') is-invalid @enderror"
                                 wire:model.live="apellido_paterno">
                             @error('apellido_paterno')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -242,7 +319,7 @@
 
                         <!-- APELLIDO MATERNO -->
                         <div class="col-md-4">
-                            <label class="form-label">Apellido Materno</label>
+                            <label class="form-label">Apellido Materno<span class="text-danger">*</span></label>
                             <input type="text"
                                 class="form-control @error('apellido_materno') is-invalid @enderror"
                                 wire:model.live="apellido_materno">
@@ -253,7 +330,7 @@
 
                         <!-- DNI -->
                         <div class="col-md-4">
-                            <label class="form-label">DNI</label>
+                            <label class="form-label">DNI<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('dni') is-invalid @enderror"
                                 wire:model.live="dni">
                             @error('dni')
@@ -263,7 +340,7 @@
 
                         <!-- TELEFONO -->
                         <div class="col-md-4">
-                            <label class="form-label">Teléfono</label>
+                            <label class="form-label">Teléfono<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('telefono') is-invalid @enderror"
                                 wire:model.live="telefono">
                             @error('telefono')
@@ -273,7 +350,7 @@
 
                         <!-- CORREO -->
                         <div class="col-md-4">
-                            <label class="form-label">Correo</label>
+                            <label class="form-label">Correo<span class="text-danger">*</span></label>
                             <input type="email" class="form-control @error('correo') is-invalid @enderror"
                                 wire:model.live="correo">
                             @error('correo')
@@ -283,7 +360,7 @@
 
                         <!-- FECHA NACIMIENTO -->
                         <div class="col-md-6">
-                            <label class="form-label">Fecha de nacimiento</label>
+                            <label class="form-label">Fecha de nacimiento<span class="text-danger">*</span></label>
                             <input type="date"
                                 class="form-control @error('fecha_nacimiento') is-invalid @enderror"
                                 wire:model.live="fecha_nacimiento">
@@ -294,7 +371,7 @@
 
                         <!-- ESPECIALIDAD -->
                         <div class="col-md-6">
-                            <label class="form-label">Especialidad</label>
+                            <label class="form-label">Especialidad<span class="text-danger">*</span></label>
                             <select class="form-select @error('especialidad_id') is-invalid @enderror"
                                 wire:model.live="especialidad_id">
                                 <option hidden value="">Seleccione</option>
@@ -314,8 +391,8 @@
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">Cerrar</button>
 
-                    <button type="submit" class="btn btn-success" wire:loading.attr="disabled">
-                        <span wire:loading.remove>Guardar</span>
+                    <button type="submit" class="btn btn-warning" wire:loading.attr="disabled">
+                        <span wire:loading.remove> <i class="bi bi-save2 me-1"></i> Guardar cambios</span>
                         <span wire:loading class="spinner-border spinner-border-sm"></span>
                     </button>
                 </div>
@@ -388,7 +465,7 @@
                         <!-- =============== FACULTAD =============== -->
                         <div class="row g-3">
                             <div class="col-md-12">
-                                <label for="facultadSelect" class="form-label">Seleccionar Facultad</label>
+                                <label for="facultadSelect" class="form-label">Facultad</label>
                                 <select class="form-select" id="facultadSelect" wire:model.live="facultad_id">
                                     <option value="" hidden>Seleccione</option>
                                     @foreach ($facultades as $facultad)
@@ -401,7 +478,8 @@
                         <!-- =============== CARRERA =============== -->
                         <div class="row g-3 mt-1">
                             <div class="col-md-12">
-                                <label for="carreraSelect" class="form-label">Seleccionar Carrera</label>
+                                <label for="carreraSelect" class="form-label">Carrera<span
+                                        class="text-danger">*</span></label>
                                 <select class="form-select" id="carreraSelect" wire:model.live="carrera_id"
                                     @disabled(!$facultad_id)>
                                     <option value="" hidden>Seleccione</option>
@@ -414,7 +492,7 @@
                         <div class="row g-3">
                             <!-- =============== CURSOS =============== -->
                             <div class="col-md-6">
-                                <label class="form-label">Curso</label>
+                                <label class="form-label">Curso<span class="text-danger">*</span></label>
                                 <select class="form-select @error('curso_id') is-invalid @enderror"
                                     wire:model.live="curso_id" @disabled(!$carrera_id)>
                                     <option value="" hidden>Seleccione</option>
@@ -429,7 +507,7 @@
 
                             <!-- =============== SEMESTRES =============== -->
                             <div class="col-md-6">
-                                <label class="form-label">Semestre</label>
+                                <label class="form-label">Semestre<span class="text-danger">*</span></label>
                                 <select class="form-select @error('semestre_id') is-invalid @enderror"
                                     wire:model="semestre_id">
                                     <option value="" hidden>Seleccione</option>
@@ -444,7 +522,7 @@
 
                             <!-- =============== GRUPOS =============== -->
                             <div class="col-12">
-                                <label class="form-label">Grupos</label>
+                                <label class="form-label">Grupos<span class="text-danger">*</span></label>
                                 <div class="d-flex flex-wrap gap-3">
                                     @foreach ($grupos as $grupo)
                                         @php

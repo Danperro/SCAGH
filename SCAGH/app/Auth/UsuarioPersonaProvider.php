@@ -15,11 +15,6 @@ class UsuarioPersonaProvider extends EloquentUserProvider
         foreach ($credentials as $key => $value) {
             if (str_contains($key, 'password')) continue;
 
-            // ✅ cuando venga email, buscarlo en persona.correo
-            if ($key === 'email') {
-                $query->whereHas('persona', fn($q) => $q->where('correo', $value));
-                continue;
-            }
 
             $query->where($key, $value);
         }

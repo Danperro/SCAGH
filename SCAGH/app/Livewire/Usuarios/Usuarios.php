@@ -2,11 +2,14 @@
 
 namespace App\Livewire\Usuarios;
 
+use App\Models\Catalogo;
+use App\Models\Docente;
 use App\Models\Persona;
 use App\Models\Rol;
 use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -14,10 +17,12 @@ use Livewire\WithPagination;
 class Usuarios extends Component
 {
     use WithPagination;
-
+    protected $paginationTheme = 'bootstrap';
     public $query, $filtroestado, $filtrorol;
-    public $usuario_id, $username, $password, $password_confirmation, $rol_id, $estado;
+    public $usuario_id, $username, $password, $password_confirmation, $rol_id, $estado, $email;
     public $persona_id, $nombre, $apellido_paterno, $apellido_materno, $dni, $telefono, $correo, $fecha_nacimiento;
+    public $especialidad_id;
+
     #[Url('Busqueda')]
 
 
@@ -44,9 +49,13 @@ class Usuarios extends Component
         $this->username          = $usuario->username;
         $this->rol_id            = $usuario->rol_id;
         $this->estado            = $usuario->estado;
-
+        $this->email = $usuario->email;
         $this->password = null;
         $this->password_confirmation = null;
+
+        $docente = Docente::where('persona_id', $this->persona_id)->first();
+
+        $this->especialidad_id = $docente ? $docente->especialidad_id : null;
     }
 
 
@@ -57,6 +66,7 @@ class Usuarios extends Component
             'username',
             'password',
             'password_confirmation',
+            'email',
             'rol_id',
             'estado',
 
@@ -97,6 +107,13 @@ class Usuarios extends Component
                 'unique:persona,correo,' . $this->persona_id,
             ],
 
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('usuario', 'email')->ignore($this->usuario_id),
+                'different:correo',
+            ],
             'fecha_nacimiento' => [
                 'required',
                 'date',
@@ -170,6 +187,12 @@ class Usuarios extends Component
         'correo.regex' => 'El correo debe terminar en .com, .pe, .edu o .es.',
         'correo.unique' => 'Este correo ya está registrado.',
 
+        // Correo de confirmacion
+        'email.required' => 'El correo es obligatorio.',
+        'email.email' => 'Debe ingresar un correo electrónico válido.',
+        'email.regex' => 'El correo debe terminar en .com, .pe, .edu o .es.',
+        'email.unique' => 'Este correo ya está registrado.',
+
         // Fecha nacimiento
         'fecha_nacimiento.required' => 'La fecha de nacimiento es obligatoria.',
         'fecha_nacimiento.before' => 'Debe ser mayor de 18 años.',
@@ -203,7 +226,6 @@ class Usuarios extends Component
     }
 
 
-    public function updatedRolId() {}
 
     public function CrearUsuario()
     {
@@ -225,6 +247,7 @@ class Usuarios extends Component
                 'persona_id'   => $persona->id,
                 'username'     => $this->username,
                 'password' => Hash::make($this->password),
+                'email' => $this->email,
                 'rol_id'       => 1
             ]);
 
@@ -261,6 +284,7 @@ class Usuarios extends Component
             $usuario->update([
                 'username' => $this->username,
                 'rol_id' => $this->rol_id,
+                'email' => $this->email,
                 'estado' => $this->estado,
             ]);
 
@@ -293,7 +317,6 @@ class Usuarios extends Component
             $this->dispatch('cerrarModal');
             $this->dispatch('toast-general', mensaje: 'Usuario se elimino correctamente.', tipo: 'success');
         } catch (\Throwable $e) {
-        } catch (\Throwable $e) {
             Log::error('Error al actualizar usuario: ' . $e->getMessage());
             $this->dispatch('toast-general', mensaje: 'Ocurrio un error al eliminar el usuario.', tipo: 'danger');
         }
@@ -305,10 +328,12 @@ class Usuarios extends Component
             ->search($this->query, $this->filtrorol, $this->filtroestado)
             ->orderBy('id', 'desc')
             ->paginate(10);
+        $especialidades = Catalogo::where('padre_id', 26)->get();
         $roles = Rol::get();
         return view('livewire.usuarios.usuarios', [
             'usuarios' => $usuarios,
-            'roles' => $roles
+            'roles' => $roles,
+            'especialidades' => $especialidades,
         ]);
     }
 }

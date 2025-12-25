@@ -149,13 +149,11 @@
 
     {{-- DATOS GENERALES (en cuadro) --}}
     <div class="fila-datos">
+       
         <div class="col">
+
             <p><strong>Asignatura:</strong>
                 {{ $asistencia->horarioCursoDocente->docenteCurso->curso->nombre }}
-                <span style="margin-left: 10px;">
-                    <strong>Grupo:</strong>
-                    {{ $asistencia->horarioCursoDocente->docenteCurso->grupo->nombre }}
-                </span>
             </p>
             <p><strong>Docente:</strong>
                 {{ $asistencia->horarioCursoDocente->docenteCurso->docente->persona->nombre }}

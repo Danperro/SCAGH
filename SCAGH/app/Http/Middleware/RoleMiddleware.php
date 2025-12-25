@@ -15,7 +15,7 @@ class RoleMiddleware
         }
 
         // $roles llega como strings: '1','2','3'...
-        $rolActual = (string) Auth::user()->rol_id;
+        $rolActual = (string) (Auth::user()->rol_id ?? '');
 
         if (!in_array($rolActual, $roles, true)) {
             abort(403, 'No tienes permisos para acceder a este módulo.');

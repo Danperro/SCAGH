@@ -41,17 +41,7 @@
             left: 0;
             height: 100vh;
             z-index: 1050;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-            /* evita que se arrastre el fondo */
             overflow-y: auto;
-        }
-
-        body.sidebar-open {
-            overflow: hidden !important;
-            height: 100vh !important;
-            position: fixed;
-            width: 100%;
         }
 
         .sidebar.collapsed {
@@ -268,15 +258,77 @@
             }
         }
 
-        /*aaaa
-        /* Sidebar móvil oculto */
+        .mobile-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 90px;
+            background-color: var(--sidebar-bg);
+            z-index: 1100;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+        }
+
+        .mobile-header-content {
+            height: 100%;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-header .brand {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .mobile-header .brand i {
+            color: #1e6b3a;
+            font-size: 1.3rem;
+        }
+
+        .mobile-header .menu-btn {
+            background: #1e6b3a;
+            border: none;
+            color: #fff;
+            padding: .45rem .65rem;
+            border-radius: .5rem;
+            font-size: 1.4rem;
+        }
+
+        /* espacio para que no tape el contenido */
+        @media (max-width: 992px) {
+            .content-area {
+                padding-top: 80px !important;
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- HEADER FIJO SOLO MÓVIL -->
+    <header class="mobile-header d-lg-none">
+        <div class="mobile-header-content">
+            <div class="brand">
+                <i class="bi bi-clock-history"></i>
+                <span>SCAGH</span>
+            </div>
+
+            <!-- USAMOS EL MISMO BOTÓN -->
+            <button id="sidebarToggle" class="menu-btn">
+                <i class="bi bi-list"></i>
+            </button>
+        </div>
+    </header>
+
     <div id="overlay" class="overlay"></div>
 
     <div class="main-container">
+
         <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
             <div class="d-flex flex-column" style="height: 100%; overflow-y: auto;">
@@ -284,7 +336,8 @@
                 <!-- Brand -->
                 <div class="brand-link text-center">
                     <a href="/Horarios" class="d-flex flex-column align-items-center text-white text-decoration-none">
-                        <span class="fs-3 fw-bold">
+                        <span class="fs-3 fw-bold" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                            title="Sistema de control de asistencia y gestion de horarios de los laboratorios">
                             <i class="bi bi-clock-history fs-1 me-2"></i>
                             SCAGH
                         </span>
@@ -296,6 +349,11 @@
                     <ul class="nav nav-pills flex-column px-3" id="sidebarAccordion">
 
                         <!-- SOLO ACTIVAMOS ESTE MÓDULO -->
+                        <li class="nav-item">
+                            <a href="/Carreras" class="nav-link text-white d-flex align-items-center gap-2">
+                                <i class="bi bi-mortarboard"></i> Gestión de Carreras
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="/Cursos" class="nav-link text-white d-flex align-items-center gap-2">
                                 <i class="bi bi-journal-bookmark"></i> Gestión de Cursos
@@ -343,12 +401,7 @@
                         </li>
 
 
-                        <!-- ⛔ Los demás módulos todavía no existen — evitamos errores -->
-                        {{-- 
-                        <li class="nav-item"><a href="/Control" class="nav-link">Control</a></li>
-                        <li class="nav-item"><a href="/Laboratorios" class="nav-link">Laboratorios</a></li>
-                        <li class="nav-item"><a href="/Usuarios" class="nav-link">Usuarios</a></li>
-                        --}}
+
                     </ul>
                 </div>
 
@@ -394,86 +447,47 @@
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const contentArea = document.querySelector('.content-area');
 
-            /* -------------------------------------------------------
-               VARIABLES GLOBALES
-            ------------------------------------------------------- */
-            const sidebar = document.getElementById("sidebar");
-            const overlay = document.getElementById("overlay");
-            const contentArea = document.querySelector(".content-area");
-            const sidebarToggle = document.getElementById("sidebarToggle"); // Botón desktop
-            const mobileMenuBtn = document.getElementById("mobileMenuBtn"); // Botón móvil (navbar)
-
-            /* -------------------------------------------------------
-               FUNCIONES PARA DESKTOP
-               (Sidebar fijo a la izquierda)
-            ------------------------------------------------------- */
-
-            // Mostrar sidebar grande
-            function openDesktop() {
-                sidebar.classList.remove("collapsed");
-                contentArea?.classList.remove("expanded");
-            }
-
-            // Minimizar sidebar en escritorio (modo colapsado)
-            function closeDesktop() {
-                sidebar.classList.add("collapsed");
-                contentArea?.classList.add("expanded");
-            }
-
-            // Alternar entre abierto/cerrado
-            function toggleDesktop() {
-                sidebar.classList.toggle("collapsed");
-                contentArea?.classList.toggle("expanded");
-            }
-
-            /* -------------------------------------------------------
-               FUNCIONES PARA MÓVIL
-               (Sidebar deslizable sobre el contenido)
-            ------------------------------------------------------- */
-
-            // Mostrar sidebar móvil
             function openMobile() {
-                sidebar.classList.add("show");
-                overlay.classList.add("show");
-                overlay.style.opacity = "1"; // Aseguramos que la opacidad sea 1 al abrir
-                overlay.style.display = "block"; // Mostramos el overlay
-                document.body.classList.add("sidebar-open");
+                sidebar.classList.add('show');
+                overlay.classList.add('show');
             }
 
-            // Ocultar sidebar móvil
             function closeMobile() {
-                sidebar.classList.remove("show");
-                overlay.classList.remove("show");
-                overlay.style.opacity = "0"; // Aseguramos que la opacidad sea 0 al cerrarlo
-                overlay.style.display = "none"; // También ocultamos el overlay completamente
-                document.body.classList.remove("sidebar-open");
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
             }
 
-            // Alternar sidebar móvil
             function toggleMobile() {
-                sidebar.classList.toggle("show");
-                overlay.classList.toggle("show");
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
             }
 
-            /* -------------------------------------------------------
-               CONFIGURACIÓN DE BOTONES
-            ------------------------------------------------------- */
-
-            // --- Botón hamburguesa (MÓVIL) ---
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener("click", function() {
-                    openMobile();
-                });
+            function openDesktop() {
+                sidebar.classList.remove('collapsed');
+                contentArea?.classList.remove('expanded');
             }
 
-            // --- Botón colapsar/expandir (DESKTOP) ---
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener("click", function(e) {
+            function closeDesktop() {
+                sidebar.classList.add('collapsed');
+                contentArea?.classList.add('expanded');
+            }
+
+            function toggleDesktop() {
+                sidebar.classList.toggle('collapsed');
+                contentArea?.classList.toggle('expanded');
+            }
+
+            // Click del botón de toggle del sidebar
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-
                     if (window.innerWidth >= 992) {
                         toggleDesktop();
                     } else {
@@ -482,37 +496,33 @@
                 });
             }
 
-            /* -------------------------------------------------------
-               CERRAR SIDEBAR AL TOCAR OVERLAY (solo móvil)
-            ------------------------------------------------------- */
-            overlay?.addEventListener("click", closeMobile);
+            // Cerrar al tocar overlay en móvil
+            overlay?.addEventListener('click', closeMobile);
 
-            /* -------------------------------------------------------
-               MANEJO DEL RESIZE DE LA VENTANA
-               Evita errores al rotar celular o cambiar tamaño de ventana
-            ------------------------------------------------------- */
-            function handleResize() {
+            // Al redimensionar, limpia estados móviles
+            window.addEventListener('resize', function() {
                 if (window.innerWidth >= 992) {
-                    closeMobile(); // Por seguridad
-                    openDesktop(); // Sidebar fijo
+                    closeMobile();
+                    openDesktop();
                 } else {
-                    sidebar.classList.remove("collapsed"); // Evita colapso en móvil
-                    contentArea?.classList.remove("expanded");
+                    sidebar.classList.remove('collapsed');
+                    contentArea?.classList.remove('expanded');
                     closeMobile();
                 }
+            });
+
+            // Estado inicial
+            if (window.innerWidth >= 992) {
+                openDesktop();
+            } else {
+                closeMobile();
             }
-            window.addEventListener("resize", handleResize);
 
-            // Inicial
-            handleResize();
-
-            /* -------------------------------------------------------
-               ACTIVAR LINK ACTUAL DEL MENÚ (AUTO-DETECCIÓN DE RUTA)
-            ------------------------------------------------------- */
+            // === Activar link actual (match más específico) ===
             const current = location.pathname.replace(/\/+$/, '') || '/';
             const links = Array.from(document.querySelectorAll('#sidebar a.nav-link[href]'));
 
-            // Quitar estados previos
+            // Limpia estados previos
             links.forEach(a => a.classList.remove('active'));
 
             function normalize(p) {
@@ -525,141 +535,61 @@
                 currentPath = normalize(currentPath);
                 href = normalize(href);
                 if (currentPath === href) return true;
+                // Debe coincidir por segmento completo: /Reportes vs /ReportesIncidencias NO
+                // pero /Reportes/Algo SÍ coincide con /Reportes
                 return currentPath.startsWith(href + '/');
             }
 
+            // Elige el mejor match por:
+            // 1) exacto; si hay varios, el más largo
+            // 2) si no hay exacto, el match por segmento con href más largo
             let best = null;
-
-            // Buscar coincidencia más precisa
             for (const a of links) {
                 const href = a.getAttribute('href');
                 if (!href || href === '#') continue;
 
                 if (pathMatches(current, href)) {
                     const exact = normalize(current) === normalize(href);
-                    const score = (exact ? 1000 : 0) + normalize(href).length;
+                    const score = (exact ? 1 : 0) * 1000 + normalize(href).length; // exacto gana
                     if (!best || score > best.score) {
                         best = {
                             el: a,
-                            score
+                            score,
+                            href: normalize(href)
                         };
                     }
                 }
             }
 
-            // Fallback a /Control si no encontró nada
-            if (!best) best = {
-                el: document.querySelector('#sidebar a.nav-link[href="/Control"]'),
-                score: 0
-            };
+            // Si no hay match, usa /Control como fallback
+            if (!best) {
+                best = {
+                    el: document.querySelector('#sidebar a.nav-link[href="/Control"]') || null,
+                    score: 0
+                };
+            }
 
-            // Activar enlace
             if (best && best.el) {
-                best.el.classList.add("active");
+                best.el.classList.add('active');
 
-                // Abrir grupo padre (colapsable)
-                const grp = best.el.closest(".collapse");
-                if (grp && !grp.classList.contains("show")) {
-                    grp.classList.add("show");
+                // Abre su grupo colapsable padre sin crear instancias duplicadas
+                const grp = best.el.closest('.collapse');
+                if (grp && !grp.classList.contains('show')) {
+                    grp.classList.add('show');
                     const triggerBtn = document.querySelector(
                         `[data-bs-toggle="collapse"][data-bs-target="#${grp.id}"]`);
-                    if (triggerBtn) triggerBtn.setAttribute("aria-expanded", "true");
+                    if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'true');
                 }
             }
-
-            /* ============================================================
-               GESTO GLOBAL (desde cualquier parte de la pantalla)
-               ============================================================ */
-            let startX = 0;
-            let startY = 0;
-            let dragging = false;
-            let isHorizontal = false;
-
-            const THRESHOLD = 20; // Qué tan horizontal debe ser el gesto
-            const SWIPE_MIN = 60; // Distancia mínima para abrir/cerrar
-
-            document.addEventListener("touchstart", (e) => {
-                if (window.innerWidth >= 992) return;
-
-                const t = e.touches[0];
-                startX = t.clientX;
-                startY = t.clientY;
-                dragging = true;
-                isHorizontal = false;
-
-                sidebar.style.transition = "none";
-                overlay.style.transition = "none";
-            });
-
-            function handleTouchMove(e) {
-                if (!dragging) return;
-                if (window.innerWidth >= 992) return;
-
-                const t = e.touches[0];
-                const deltaX = t.clientX - startX;
-                const deltaY = Math.abs(t.clientY - startY);
-
-                // Detectar si el gesto es horizontal
-                if (!isHorizontal) {
-                    if (deltaY > THRESHOLD) {
-                        dragging = false;
-                        return;
-                    }
-                    if (Math.abs(deltaX) > THRESHOLD) {
-                        isHorizontal = true;
-                    }
-                }
-
-                if (!isHorizontal) return;
-
-                const sidebarOpen = sidebar.classList.contains("show");
-
-                // Abrir (swipe derecha)
-                if (!sidebarOpen) {
-                    let pos = Math.min(0, -260 + deltaX);
-                    sidebar.style.transform = `translateX(${pos}px)`;
-                    overlay.style.opacity = Math.min(1, deltaX / 260);
-                    overlay.style.display = "block";
-                }
-                // Cerrar (swipe izquierda)
-                else {
-                    let pos = Math.max(-260, deltaX);
-                    sidebar.style.transform = `translateX(${pos}px)`;
-                    overlay.style.opacity = Math.max(0, 1 - Math.abs(deltaX) / 260);
-                }
-
-                e.preventDefault(); // Evita gesto del navegador
-            }
-
-            document.addEventListener("touchmove", handleTouchMove, {
-                passive: false
-            });
-
-            document.addEventListener("touchend", (e) => {
-                if (!dragging || !isHorizontal) return;
-                dragging = false;
-
-                const endX = e.changedTouches[0].clientX;
-                const deltaX = endX - startX;
-
-                sidebar.style.transition = "";
-                overlay.style.transition = "";
-
-                const sidebarOpen = sidebar.classList.contains("show");
-
-                if (!sidebarOpen) {
-                    if (deltaX > SWIPE_MIN) openMobile();
-                    else closeMobile();
-                } else {
-                    if (deltaX < -SWIPE_MIN) closeMobile();
-                    else openMobile();
-                }
-
-                sidebar.style.transform = "";
-            });
 
 
         });
+    </script>
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
     </script>
 
 

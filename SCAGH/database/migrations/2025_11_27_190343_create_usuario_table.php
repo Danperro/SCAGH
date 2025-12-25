@@ -20,7 +20,8 @@ return new class extends Migration {
 
             $table->string('username', 50)->unique();
             $table->string('password');
-
+            $table->string('email', 250);
+            $table->rememberToken('remember_token');
             $table->boolean('estado')->default(true);
 
             // Auditoría

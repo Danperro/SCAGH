@@ -19,6 +19,8 @@ class Asistencias extends Component
     public $horaHoy;
     public $horario_id;
     public $curso;
+    public $carrera;
+    public $facultad;
     public $laboratorioActual;
     public $fechaActual;
     public $horas, $docente;
@@ -49,7 +51,7 @@ class Asistencias extends Component
         if (!$diaCatalogo) {
             $this->curso = null;
             $this->horas = null;
-            $this->docente_curso_id = null;  
+            $this->docente_curso_id = null;
             return;
         }
 
@@ -71,9 +73,11 @@ class Asistencias extends Component
 
 
         $this->horario_curso_docente_id = $registro->id;
-        $this->docente_curso_id = $registro->docenteCurso->id; 
+        $this->docente_curso_id = $registro->docenteCurso->id;
 
         $this->curso = $registro->docenteCurso->curso->nombre;
+        $this->carrera = $registro->docenteCurso->curso->carrera->nombre;
+        $this->facultad = $registro->docenteCurso->curso->carrera->facultad->nombre;
         $this->docente = $registro->docenteCurso->docente->persona->nombre . ' ' .
             $registro->docenteCurso->docente->persona->apellido_paterno . ' ' .
             $registro->docenteCurso->docente->persona->apellido_materno;
@@ -81,7 +85,7 @@ class Asistencias extends Component
         $this->laboratorioActual = $registro->horario->laboratorio->nombre ?? '';
         $this->horas = $registro->semana->nombre . ': ' . substr($registro->hora_inicio, 0, 5) . " - " . substr($registro->hora_fin, 0, 5);
 
-       
+
         $this->asistencia = [];
 
         $fechaHoy = Carbon::now('America/Lima')->toDateString();

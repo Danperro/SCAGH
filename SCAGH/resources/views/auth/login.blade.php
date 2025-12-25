@@ -202,7 +202,6 @@
             border-left: 4px solid #dc3545;
         }
 
-        /* ✅ NUEVO: alerta verde para status */
         .alert-success {
             background: rgba(32, 201, 151, 0.12);
             color: #bff5e6;
@@ -241,7 +240,6 @@
                 <p class="login-subtitle">Accede con tu usuario y contraseña</p>
             </div>
 
-            {{-- ✅ Mensaje verde (por ejemplo: "Tu contraseña fue restablecida...") --}}
             @if (session('status'))
                 <div class="alert alert-success">
                     <i class="fas fa-circle-check me-2"></i>
@@ -249,7 +247,6 @@
                 </div>
             @endif
 
-            {{-- Error de login --}}
             @if ($errors->any())
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-triangle me-2"></i>
@@ -261,7 +258,7 @@
                 @csrf
 
                 <div class="form-group">
-                    <label for="username" class="form-label">Usuario</label>
+                    <label for="username" class="form-label">Usuario<span class="text-danger">*</span></label>
                     <input id="username" type="text" name="username" value="{{ old('username') }}"
                         class="form-control @error('username') is-invalid @enderror" placeholder="Ingresa tu usuario"
                         autocomplete="username" autofocus required>
@@ -272,7 +269,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="form-label">Contraseña</label>
+                    <label for="password" class="form-label">Contraseña<span class="text-danger">*</span></label>
                     <input id="password" type="password" name="password"
                         class="form-control @error('password') is-invalid @enderror" placeholder="Ingresa tu contraseña"
                         autocomplete="current-password" required>
