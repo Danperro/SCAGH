@@ -39,4 +39,9 @@ class Rol extends Model
     {
         return $this->hasMany(Acceso::class);
     }
+    public function usuario()
+    {
+        return $this->belongsToMany(Usuario::class, 'usuario_rol')
+            ->wherePivot('estado', true);;
+    }
 }

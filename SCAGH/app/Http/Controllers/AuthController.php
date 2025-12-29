@@ -32,13 +32,7 @@ class AuthController extends Controller
         if (Auth::attempt($credenciales, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            $rol = Auth::user()->rol_id;
-
-            return match ($rol) {
-                1 => redirect()->intended('/Usuarios'),
-                2 => redirect()->intended('/Asistencias'),
-                default => redirect()->intended('/Horarios')
-            };
+           
         }
 
         return back()

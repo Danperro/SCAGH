@@ -42,9 +42,14 @@ class Docentes extends Component
         $this->telefono = $docente->persona->telefono;
         $this->correo = $docente->persona->correo;
         $this->fecha_nacimiento = $docente->persona->fecha_nacimiento;
+        $semestreVigente = Semestre::where('fecha_inicio', '<=', now())
+            ->where('fecha_fin', '>=', now())
+            ->orderByDesc('id')
+            ->first();
+
+        $this->semestre_id = $semestreVigente?->id;
 
         $this->especialidad_id = $docente->especialidad_id;
-
     }
 
 
@@ -309,10 +314,12 @@ class Docentes extends Component
         }
 
         $cursosOcupados = DocenteCurso::where('semestre_id', $semestreVigente->id)
+            ->where('estado', 1) // ✅ SOLO ACTIVOS
             ->when($this->docente_id, function ($q) {
                 $q->where('docente_id', '!=', $this->docente_id);
             })
-            ->pluck('curso_id');
+            ->pluck('curso_id')
+            ->unique();
 
         $this->cursos = Curso::where('carrera_id', $value)
             ->when($cursosOcupados->isNotEmpty(), function ($q) use ($cursosOcupados) {
@@ -331,7 +338,10 @@ class Docentes extends Component
             $this->gruposAsignadosCursoActual = DocenteCurso::where('docente_id', $this->docente_id)
                 ->where('curso_id', $value)
                 ->where('semestre_id', $this->semestre_id)
+                ->where('estado', 1)
                 ->pluck('grupo_id')
+                ->unique()
+                ->values()
                 ->toArray();
         } else {
             $this->gruposAsignadosCursoActual = [];
@@ -342,26 +352,85 @@ class Docentes extends Component
     public function GuardarAsignacionCurso()
     {
         $this->validate($this->rulesAsignacionCurso());
+
         try {
             foreach ($this->gruposSeleccionados as $grupoId) {
-                DocenteCurso::firstOrCreate(
-                    [
+
+                // 1. Buscar si ya existió esa asignación (aunque esté inactiva)
+                $asignacion = DocenteCurso::where([
+                    'docente_id'  => $this->docente_id,
+                    'curso_id'    => $this->curso_id,
+                    'semestre_id' => $this->semestre_id,
+                    'grupo_id'    => $grupoId,
+                ])->first();
+
+                if ($asignacion) {
+                    // 2. Reactivar
+                    $asignacion->update(['estado' => 1]);
+                } else {
+                    // 3. Crear nueva
+                    DocenteCurso::create([
                         'docente_id'  => $this->docente_id,
                         'curso_id'    => $this->curso_id,
                         'semestre_id' => $this->semestre_id,
                         'grupo_id'    => $grupoId,
-                    ]
-                );
+                        'estado'      => 1,
+                    ]);
+                }
             }
+
             $this->limpiar();
             $this->dispatch('cerrarModal');
-            $this->dispatch('toast-general', mensaje: 'Docente asignado al curso correctamente.', tipo: 'success');
+            $this->dispatch(
+                'toast-general',
+                mensaje: 'Curso asignado correctamente.',
+                tipo: 'success'
+            );
         } catch (\Throwable $e) {
-            Log::error("Error al asignar el curso al docente " . $e->getMessage());
-            $this->dispatch('toast-general', mensaje: 'Ocurrió un error al asignar el curso al docente.', tipo: 'danger');
+            Log::error("Error al asignar curso: " . $e->getMessage());
+
+            $this->dispatch(
+                'toast-general',
+                mensaje: 'Ocurrió un error al asignar el curso.',
+                tipo: 'danger'
+            );
         }
     }
 
+    public function eliminarAsignacion($id)
+    {
+        try {
+            $curoasignado = DocenteCurso::findOrFail($id);
+            $curoasignado->update(['estado' => 0]);
+            $this->dispatch('cerrarModal');
+            $this->dispatch('toast-general', mensaje: 'Se elimino correctamente la asignacion del curso al docente.', tipo: 'success');
+        } catch (\Throwable $e) {
+            Log::error("Error al eliminar la asignacion del curso al docente " . $e->getMessage());
+            $this->dispatch('toast-general', mensaje: 'Ocurrió un error al eliminar la asignacion del curso al docente.', tipo: 'danger');
+        }
+    }
+    public function CambiarEstadoDocente($id)
+    {
+        try {
+            $docente = Docente::findOrFail($id);
+            $docente->estado = !$docente->estado;
+            $docente->save();
+
+            $this->dispatch(
+                'toast-general',
+                mensaje: 'Estado del docente actualizado correctamente.',
+                tipo: 'success'
+            );
+        } catch (\Throwable $e) {
+            Log::error("Error al cambiar el estado del docente: " . $e->getMessage());
+
+            $this->dispatch(
+                'toast-general',
+                mensaje: 'Ocurrió un error al cambiar el estado del docente.',
+                tipo: 'danger'
+            );
+        }
+    }
 
     public function render()
     {
@@ -395,6 +464,7 @@ class Docentes extends Component
             $this->asignacionesDocente = DocenteCurso::with(['curso', 'semestre', 'grupo'])
                 ->where('docente_id', $this->docente_id)
                 ->where('semestre_id', $semestreVigente->id)
+                ->where('estado', 1)
                 ->orderBy('id', 'desc')
                 ->get();
         } else {

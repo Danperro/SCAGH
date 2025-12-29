@@ -85,10 +85,13 @@
                                 </td>
                                 <td class="text-center">{{ $docente->especialidad->nombre }}</td>
                                 <td class="text-center">
-                                    <span class="badge {{ $docente->estado ? 'bg-success' : 'bg-danger' }}">
+                                    <span class="badge {{ $docente->estado ? 'bg-success' : 'bg-danger' }}"
+                                        style="cursor: pointer;" wire:click="CambiarEstadoDocente({{ $docente->id }})"
+                                        title="Click para cambiar estado">
                                         {{ $docente->estado_texto }}
                                     </span>
                                 </td>
+
                                 <td class="text-center">
                                     <button class="btn btn-info btn-sm" wire:click="selectInfo({{ $docente->id }})"
                                         data-bs-toggle="modal" data-bs-target="#modalAsignarCurso">
@@ -222,46 +225,6 @@
                             @enderror
                         </div>
 
-                        <!-- USERNAME -->
-                        <div class="col-md-4">
-                            <label class="form-label">Usuario<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('username') is-invalid @enderror"
-                                wire:model.live="username">
-                            @error('username')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- PASSWORD -->
-                        <div class="col-md-4">
-                            <label class="form-label">Contraseña<span class="text-danger">*</span></label>
-                            <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                wire:model.live="password">
-                            @error('password')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- CONFIRMAR PASSWORD -->
-                        <div class="col-md-4">
-                            <label class="form-label">Confirmar Contraseña<span class="text-danger">*</span></label>
-                            <input type="password"
-                                class="form-control @error('password_confirmation') is-invalid @enderror"
-                                wire:model.live="password_confirmation">
-                            @error('password_confirmation')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <!-- CORREO DE RECUPERACION -->
-                        <div class="col-md-4">
-                            <label id="emailLabel" class="form-label">Correo de Recuperacion<span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('email') is-invalid @enderror"
-                                wire:model.live="email">
-                            @error('email')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
                     </div>
                 </div>
 
@@ -309,8 +272,7 @@
                         <!-- APELLIDO PATERNO -->
                         <div class="col-md-4">
                             <label class="form-label">Apellido Paterno<span class="text-danger">*</span></label>
-                            <input type="text"
-                                class="form-control @error('apellido_paterno') is-invalid @enderror"
+                            <input type="text" class="form-control @error('apellido_paterno') is-invalid @enderror"
                                 wire:model.live="apellido_paterno">
                             @error('apellido_paterno')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -481,7 +443,7 @@
                                 <label for="carreraSelect" class="form-label">Carrera<span
                                         class="text-danger">*</span></label>
                                 <select class="form-select" id="carreraSelect" wire:model.live="carrera_id"
-                                    @disabled(!$facultad_id)>
+                                    wire:key="carrera-select-{{ $facultad_id ?? 'x' }}" @disabled(!$facultad_id)>
                                     <option value="" hidden>Seleccione</option>
                                     @foreach ($carreras as $carrera)
                                         <option value="{{ $carrera->id }}">{{ $carrera->nombre }}</option>
@@ -489,12 +451,13 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row g-3">
+                        <div class="row g-3 mt-1">
                             <!-- =============== CURSOS =============== -->
                             <div class="col-md-6">
                                 <label class="form-label">Curso<span class="text-danger">*</span></label>
                                 <select class="form-select @error('curso_id') is-invalid @enderror"
-                                    wire:model.live="curso_id" @disabled(!$carrera_id)>
+                                    wire:model.live="curso_id" wire:key="curso-select-{{ $carrera_id ?? 'x' }}"
+                                    @disabled(!$carrera_id)>
                                     <option value="" hidden>Seleccione</option>
                                     @foreach ($cursos as $curso)
                                         <option value="{{ $curso->id }}">{{ $curso->nombre }}</option>
@@ -509,7 +472,8 @@
                             <div class="col-md-6">
                                 <label class="form-label">Semestre<span class="text-danger">*</span></label>
                                 <select class="form-select @error('semestre_id') is-invalid @enderror"
-                                    wire:model="semestre_id">
+                                    wire:model="semestre_id" wire:key="semestre-select-{{ $curso_id ?? 'x' }}"
+                                    disabled>
                                     <option value="" hidden>Seleccione</option>
                                     @foreach ($semestres as $sem)
                                         <option value="{{ $sem->id }}">{{ $sem->nombre }}</option>

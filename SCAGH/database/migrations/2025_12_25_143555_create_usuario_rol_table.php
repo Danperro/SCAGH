@@ -4,20 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('usuario', function (Blueprint $table) {
+        Schema::create('usuario_rol', function (Blueprint $table) {
             $table->id();
 
-            // FK Persona
-            $table->unsignedBigInteger('persona_id');
-            $table->foreign('persona_id')->references('id')->on('persona');
+            $table->unsignedBigInteger('usuario_id');
+            $table->unsignedBigInteger('rol_id');
 
-            $table->string('username', 50)->unique();
-            $table->string('password');
-            $table->string('email', 250);
-            $table->rememberToken();
+            $table->foreign('usuario_id')->references('id')->on('usuario')->onDelete('cascade');
+            $table->foreign('rol_id')->references('id')->on('rol')->onDelete('cascade');
+
+            // Estado 1 = activo, 0 = retirado
             $table->boolean('estado')->default(true);
 
             // Auditoría
@@ -30,8 +33,11 @@ return new class extends Migration {
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('usuario');
+        Schema::dropIfExists('usuario_rol');
     }
 };

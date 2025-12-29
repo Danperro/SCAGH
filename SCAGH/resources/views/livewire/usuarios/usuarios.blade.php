@@ -84,7 +84,11 @@
                                 <td class="ps-4">
                                     <div class="fw-semibold text-dark">{{ $usuario->username }}</div>
                                 </td>
-                                <td class="text-center">{{ $usuario->rol->nombre }}</td>
+                                <td class="text-center">
+                                    @foreach ($usuario->roles as $rol)
+                                        <span class="badge bg-primary">{{ $rol->nombre }}</span>
+                                    @endforeach
+                                </td>
                                 <td class="text-center">
                                     <span class="badge {{ $usuario->estado ? 'bg-success' : 'bg-danger' }}">
                                         {{ $usuario->estado_texto }}
@@ -380,14 +384,14 @@
                         <!-- Rol -->
                         <div class="col-md-4">
                             <label class="form-label">Rol<span class="text-danger">*</span></label>
-                            <select class="form-select @error('rol_id') is-invalid @enderror"
-                                wire:model.live="rol_id" wire:change="actualizarCamposPorRol">
-                                <option value="" hidden>Seleccione</option>
-                                <option value="1">Administrador</option>
-                                <option value="2">Docente</option>
-                                <option value="3">Estudiante</option>
+                            <select class="form-select" multiple wire:model="rolesSeleccionados">
+                                @foreach ($roles as $rol)
+                                    <option value="{{ $rol->id }}">
+                                        {{ $rol->nombre }}
+                                    </option>
+                                @endforeach
                             </select>
-                            @error('rol_id')
+                            @error('rolesSeleccionados')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
@@ -436,7 +440,8 @@
                     {{-- =====================  CAMPOS DINÁMICOS SEGÚN ROL  ===================== --}}
 
                     {{-- DOCENTE --}}
-                    @if ($rol_id == 2)
+                    @if (in_array(2, $rolesSeleccionados))
+
                         <div class="row g-3 mt-3">
 
                             <div class="col-md-4">
@@ -458,7 +463,8 @@
 
 
                     {{-- ESTUDIANTE --}}
-                    @if ($rol_id == 3)
+                    @if (in_array(3, $rolesSeleccionados))
+
                         <div class="row g-3 mt-3">
 
                             <div class="col-md-4">

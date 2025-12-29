@@ -19,10 +19,10 @@ class Usuarios extends Component
     use WithPagination;
     protected $paginationTheme = 'bootstrap';
     public $query, $filtroestado, $filtrorol;
-    public $usuario_id, $username, $password, $password_confirmation, $rol_id, $estado, $email;
+    public $usuario_id, $username, $password, $password_confirmation, $rolesSeleccionados = [], $estado, $email;
     public $persona_id, $nombre, $apellido_paterno, $apellido_materno, $dni, $telefono, $correo, $fecha_nacimiento;
     public $especialidad_id;
-
+    
     #[Url('Busqueda')]
 
 
@@ -47,7 +47,7 @@ class Usuarios extends Component
         $this->fecha_nacimiento  = $usuario->persona->fecha_nacimiento;
 
         $this->username          = $usuario->username;
-        $this->rol_id            = $usuario->rol_id;
+        $this->rolesSeleccionados = $usuario->roles->pluck('id')->toArray();
         $this->estado            = $usuario->estado;
         $this->email = $usuario->email;
         $this->password = null;
@@ -67,7 +67,7 @@ class Usuarios extends Component
             'password',
             'password_confirmation',
             'email',
-            'rol_id',
+            'rolesSeleccionados',
             'estado',
 
             'nombre',
@@ -139,7 +139,9 @@ class Usuarios extends Component
             'correo' => 'required|email|unique:persona,correo,' . $this->persona_id,
             'fecha_nacimiento' => 'required|date|before:' . now()->subYears(18)->format('Y-m-d'),
             'username' => 'required|min:4|max:30|unique:usuario,username,' . $this->usuario_id,
-            'rol_id' => 'required',
+            'rolesSeleccionados' => 'required|array|min:1',
+            'rolesSeleccionados.*' => 'exists:rol,id',
+
         ];
 
         if (!empty($this->password)) {
@@ -212,8 +214,8 @@ class Usuarios extends Component
         'password_confirmation.min' => 'La confirmación debe tener al menos 6 caracteres.',
 
         // Rol
-        'rol_id.required' => 'Debe seleccionar un rol.',
-        'rol_id.in' => 'El rol seleccionado no es válido.',
+        'rolesSeleccionados.required' => 'Debe seleccionar al menos un rol.',
+
     ];
 
     public function updated($propertyName)
@@ -243,13 +245,16 @@ class Usuarios extends Component
                 'fecha_nacimiento'  => $this->fecha_nacimiento,
             ]);
 
-            Usuario::create([
-                'persona_id'   => $persona->id,
-                'username'     => $this->username,
-                'password' => Hash::make($this->password),
-                'email' => $this->email,
-                'rol_id'       => 1
+            $usuario = Usuario::create([
+                'persona_id' => $persona->id,
+                'username'   => $this->username,
+                'password'   => Hash::make($this->password),
+                'email'      => $this->email,
+                'estado'     => 1,
             ]);
+
+            $usuario->roles()->sync($this->rolesSeleccionados);
+
 
             $this->limpiar();
 
@@ -283,10 +288,11 @@ class Usuarios extends Component
 
             $usuario->update([
                 'username' => $this->username,
-                'rol_id' => $this->rol_id,
-                'email' => $this->email,
-                'estado' => $this->estado,
+                'email'    => $this->email,
+                'estado'   => $this->estado,
             ]);
+
+            $usuario->roles()->sync($this->rolesSeleccionados);
 
             if (!empty($this->password)) {
                 $usuario->update([
@@ -324,7 +330,7 @@ class Usuarios extends Component
 
     public function render()
     {
-        $usuarios = Usuario::with('persona', 'rol')
+        $usuarios = Usuario::with('persona', 'roles')
             ->search($this->query, $this->filtrorol, $this->filtroestado)
             ->orderBy('id', 'desc')
             ->paginate(10);

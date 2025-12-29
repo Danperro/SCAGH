@@ -14,7 +14,7 @@ class Usuario extends Authenticatable implements CanResetPasswordContract
     protected $table = 'usuario';
 
     protected $fillable = [
-        'rol_id',
+
         'persona_id',
         'username',
         'password',
@@ -57,9 +57,14 @@ class Usuario extends Authenticatable implements CanResetPasswordContract
         return $this->belongsTo(Persona::class);
     }
 
-    public function rol()
+    public function roles()
     {
-        return $this->belongsTo(Rol::class);
+        return $this->belongsToMany(
+            Rol::class,
+            'usuario_rol',
+            'usuario_id',
+            'rol_id'
+        )->wherePivot('estado', 1);
     }
 
     // IMPORTANTE: tu correo está en persona, así que lo devolvemos desde ahí
@@ -86,7 +91,9 @@ class Usuario extends Authenticatable implements CanResetPasswordContract
             ->when(
                 $rol_id !== '' && $rol_id !== null,
                 fn($q) =>
-                $q->where('rol_id', $rol_id)
+                $q->whereHas('roles', function ($r) use ($rol_id) {
+                    $r->where('rol.id', $rol_id);
+                })
             )
             ->when(
                 $valor !== '' && $valor !== null,
