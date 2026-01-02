@@ -32,7 +32,13 @@ class AuthController extends Controller
         if (Auth::attempt($credenciales, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-           
+            // ✅ si es primer ingreso, lo mandas a cambiar contraseña
+            if (Auth::user()->must_change_password) {
+                return redirect()->route('password.change.form');
+            }
+
+            // ✅ si no, entra normal
+            return redirect()->route('home');
         }
 
         return back()
@@ -141,5 +147,33 @@ class AuthController extends Controller
         return $status === Password::PASSWORD_RESET
             ? redirect('/login')->with('status', $statusEs)
             : back()->withErrors(['email' => $statusEs])->withInput();
+    }
+    public function showChangePassword()
+    {
+        return view('auth.change-password');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required'],
+            'password' => ['required', 'confirmed', 'min:8'],
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors([
+                'current_password' => 'La contraseña actual no es correcta.'
+            ])->withInput();
+        }
+
+        $user->forceFill([
+            'password' => Hash::make($request->password),
+            'must_change_password' => false,
+            'password_changed_at' => now(),
+        ])->save();
+
+        return redirect()->route('home')->with('status', 'Contraseña actualizada correctamente.');
     }
 }

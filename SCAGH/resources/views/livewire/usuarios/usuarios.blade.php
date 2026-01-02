@@ -73,6 +73,7 @@
                     <thead class="table-light">
                         <tr class="text-center">
                             <th class="text-start ps-4">Usuario</th>
+                            <th scope="col">Nombre y Apellido</th>
                             <th scope="col">Rol</th>
                             <th scope="col">Estado</th>
                             <th scope="col">Acciones</th>
@@ -83,6 +84,9 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="fw-semibold text-dark">{{ $usuario->username }}</div>
+                                </td>
+                                <td class="text-center">
+                                    {{ $usuario->persona->nombre . ' ' . $usuario->persona->apellido_paterno . ' ' . $usuario->persona->apellido_materno }}
                                 </td>
                                 <td class="text-center">
                                     @foreach ($usuario->roles as $rol)
@@ -280,7 +284,7 @@
 
             <form wire:submit.prevent="EditarUsuario" class="modal-content">
 
-                <div class="modal-header">
+                <div class="modal-header bg-warning bg-opacity-10">
                     <h5 class="modal-title fw-bold">
                         <i class="bi bi-pencil-square me-2 text-warning"></i>Editar Usuario
                     </h5>
@@ -289,119 +293,42 @@
 
                 <div class="modal-body">
 
-                    {{-- =====================  CAMPOS PERSONA  ===================== --}}
-                    <div class="row g-3">
-
-                        <!-- DNI -->
-                        <div class="col-md-4">
-                            <label class="form-label">DNI<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('dni') is-invalid @enderror"
-                                wire:model.live="dni">
-                            @error('dni')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
+                    <!-- Información del Usuario -->
+                    <div class="alert alert-light border mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle fs-3 text-warning me-3"></i>
+                            <div>
+                                <h6 class="mb-0 fw-bold">
+                                    {{ $nombre . ' ' . $apellido_paterno . ' ' . $apellido_materno }}</h6>
+                                <small class="text-muted">Información del usuario</small>
+                            </div>
                         </div>
-
-                        <!-- Nombre -->
-                        <div class="col-md-4">
-                            <label class="form-label">Nombre<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('nombre') is-invalid @enderror"
-                                wire:model.live="nombre">
-                            @error('nombre')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Apellido Paterno -->
-                        <div class="col-md-4">
-                            <label class="form-label">Apellido Paterno<span class="text-danger">*</span></label>
-                            <input type="text"
-                                class="form-control @error('apellido_paterno') is-invalid @enderror"
-                                wire:model.live="apellido_paterno">
-                            @error('apellido_paterno')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Apellido Materno -->
-                        <div class="col-md-4">
-                            <label class="form-label">Apellido Materno<span class="text-danger">*</span></label>
-                            <input type="text"
-                                class="form-control @error('apellido_materno') is-invalid @enderror"
-                                wire:model.live="apellido_materno">
-                            @error('apellido_materno')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Teléfono -->
-                        <div class="col-md-4">
-                            <label class="form-label">Teléfono<span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('telefono') is-invalid @enderror"
-                                wire:model.live="telefono">
-                            @error('telefono')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Correo -->
-                        <div class="col-md-4">
-                            <label class="form-label">Correo<span class="text-danger">*</span></label>
-                            <input type="email" class="form-control @error('correo') is-invalid @enderror"
-                                wire:model.live="correo">
-                            @error('correo')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- Fecha de nacimiento -->
-                        <div class="col-md-4">
-                            <label class="form-label">Fecha de nacimiento<span class="text-danger">*</span></label>
-                            <input type="date"
-                                class="form-control @error('fecha_nacimiento') is-invalid @enderror"
-                                wire:model.live="fecha_nacimiento">
-                            @error('fecha_nacimiento')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
                     </div>
 
-
-                    {{-- =====================  CAMPOS USUARIO  ===================== --}}
-                    <div class="row g-3 mt-3">
+                    <!-- CAMPOS USUARIO -->
+                    <div class="row g-3">
 
                         <!-- Username -->
-                        <div class="col-md-4">
-                            <label class="form-label">Usuario<span class="text-danger">*</span></label>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-person-badge me-1"></i>Usuario
+                                <span class="text-danger">*</span>
+                            </label>
                             <input type="text" class="form-control @error('username') is-invalid @enderror"
-                                wire:model.live="username">
+                                wire:model.live="username" placeholder="Ingrese el usuario">
                             @error('username')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
-                        <!-- Rol -->
-                        <div class="col-md-4">
-                            <label class="form-label">Rol<span class="text-danger">*</span></label>
-                            <select class="form-select" multiple wire:model="rolesSeleccionados">
-                                @foreach ($roles as $rol)
-                                    <option value="{{ $rol->id }}">
-                                        {{ $rol->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('rolesSeleccionados')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <!-- CORREO DE CONFIRMACION -->
-                        <div class="col-md-4">
-                            <label id="emailLabel" class="form-label">Correo de Recuperacion<span
-                                    class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('email') is-invalid @enderror"
-                                wire:model.live="email">
+                        <!-- CORREO DE RECUPERACION -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-envelope me-1"></i>Correo de Recuperación
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                wire:model.live="email" placeholder="correo@ejemplo.com">
                             @error('email')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -409,98 +336,93 @@
 
                     </div>
 
+                    <!-- ROLES -->
+                    <div class="mt-4">
+                        <label class="form-label fw-semibold mb-3">
+                            <i class="bi bi-shield-check me-1"></i>Roles del Usuario
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="card border">
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    @foreach ($roles as $rol)
+                                        <div class="col-md-4">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" role="switch"
+                                                    id="rol_{{ $rol->id }}" value="{{ $rol->id }}"
+                                                    wire:model.live="rolesSeleccionados" style="cursor: pointer;">
+                                                <label class="form-check-label" for="rol_{{ $rol->id }}"
+                                                    style="cursor: pointer;">
+                                                    {{ $rol->nombre }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                @error('rolesSeleccionados')
+                                    <div class="text-danger small mt-2">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ $message }}
+                                    </div>
+                                @enderror
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Marca los roles que deseas asignar al usuario. Los roles desmarcados se desactivarán.
+                        </small>
+                    </div>
+
+                    <!-- CONTRASEÑAS -->
                     <div class="row g-3 mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info border-info d-flex align-items-center py-2">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <small>Solo completa estos campos si deseas cambiar la contraseña del usuario</small>
+                            </div>
+                        </div>
+
                         <div class="col-md-6">
-                            <label class="form-label">
-                                Nueva contraseña<span class="text-danger">*</span>
-                                <small class="text-muted">(opcional)</small>
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-key me-1"></i>Nueva contraseña
+                                <small class="text-muted fw-normal">(opcional)</small>
                             </label>
                             <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                wire:model.live="password">
+                                wire:model.live="password" placeholder="••••••••">
                             @error('password')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label">
-                                Confirmar contraseña<span class="text-danger">*</span>
-                                <small class="text-muted">(opcional)</small>
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-key-fill me-1"></i>Confirmar contraseña
+                                <small class="text-muted fw-normal">(opcional)</small>
                             </label>
                             <input type="password"
                                 class="form-control @error('password_confirmation') is-invalid @enderror"
-                                wire:model.live="password_confirmation">
+                                wire:model.live="password_confirmation" placeholder="••••••••">
                             @error('password_confirmation')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
 
-
-                    {{-- =====================  CAMPOS DINÁMICOS SEGÚN ROL  ===================== --}}
-
-                    {{-- DOCENTE --}}
-                    @if (in_array(2, $rolesSeleccionados))
-
-                        <div class="row g-3 mt-3">
-
-                            <div class="col-md-4">
-                                <label class="form-label">Especialidad<span class="text-danger">*</span></label>
-                                <select class="form-select @error('especialidad_id') is-invalid @enderror"
-                                    wire:model.live="especialidad_id">
-                                    <option value="">Seleccione</option>
-                                    @foreach ($especialidades as $item)
-                                        <option value="{{ $item->id }}">{{ $item->nombre }}</option>
-                                    @endforeach
-                                </select>
-                                @error('especialidad_id')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                        </div>
-                    @endif
-
-
-                    {{-- ESTUDIANTE --}}
-                    @if (in_array(3, $rolesSeleccionados))
-
-                        <div class="row g-3 mt-3">
-
-                            <div class="col-md-4">
-                                <label class="form-label">Código<span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('codigo') is-invalid @enderror"
-                                    wire:model.live="codigo">
-                                @error('codigo')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label">Carrera<span class="text-danger">*</span></label>
-                                <select class="form-select @error('carrera_id') is-invalid @enderror"
-                                    wire:model.live="carrera_id">
-                                    <option value="">Seleccione</option>
-                                    @foreach ($carreras as $car)
-                                        <option value="{{ $car->id }}">{{ $car->nombre }}</option>
-                                    @endforeach
-                                </select>
-                                @error('carrera_id')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                        </div>
-                    @endif
-
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">Cerrar</button>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click="limpiar">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </button>
 
                     <button type="submit" class="btn btn-warning" wire:loading.attr="disabled">
-                        <span wire:loading.remove><i class="bi bi-save2 me-1"></i> Guardar cambios</span>
-                        <span wire:loading class="spinner-border spinner-border-sm"></span>
+                        <span wire:loading.remove>
+                            <i class="bi bi-save2 me-1"></i>Guardar cambios
+                        </span>
+                        <span wire:loading>
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            Guardando...
+                        </span>
                     </button>
                 </div>
 

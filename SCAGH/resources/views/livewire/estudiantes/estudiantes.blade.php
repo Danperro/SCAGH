@@ -78,6 +78,7 @@
                         <tr class="text-center">
                             <th scope="col">Estudiante</th>
                             <th scope="col">Codigo</th>
+                            <th scope="col">dni</th>
                             <th scope="col">Carrera</th>
                             <th scope="col">Estado</th>
                             <th scope="col">Acciones</th>
@@ -89,6 +90,7 @@
                                 <td>{{ $estudiante->persona->nombre . ' ' . $estudiante->persona->apellido_paterno . ' ' . $estudiante->persona->apellido_materno }}
                                 </td>
                                 <td>{{ $estudiante->codigo }}</td>
+                                <td>{{ $estudiante->persona->dni }}</td>
                                 <td>{{ $estudiante->carrera->nombre }}</td>
                                 <td class="text-center">
                                     <span class="badge {{ $estudiante->estado ? 'bg-success' : 'bg-danger' }}">
@@ -197,7 +199,7 @@
                         <div class="col-md-4">
                             <label for="dniEstudiante"class="form-label">DNI<span class="text-danger">*</span></label>
                             <input type="text" class="form-control @error('dni') is-invalid @enderror"
-                                wire:model.live="dni">
+                                wire:model.live.debounce.500ms="dni" maxlength="8" inputmode="numeric">
                             @error('dni')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror

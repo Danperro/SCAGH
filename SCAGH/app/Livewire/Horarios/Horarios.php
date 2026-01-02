@@ -38,7 +38,7 @@ class Horarios extends Component
         $asig = HorarioCursoDocente::with(['docenteCurso.curso.carrera'])
             ->findOrFail($id);
 
-    
+
         $this->asignacion_id = $id;
 
         $curso = $asig->docenteCurso->curso;
@@ -46,7 +46,7 @@ class Horarios extends Component
 
         $this->facultad_id = $carrera->facultad_id;
 
-      
+
         $this->carreras = Carrera::where('facultad_id', $this->facultad_id)->get();
         $this->carrera_id = $carrera->id;
 
@@ -108,7 +108,7 @@ class Horarios extends Component
 
     public function updatedCarreraId($value)
     {
-        $this->curso_id = ''; 
+        $this->curso_id = '';
 
         if (empty($value)) {
             $this->cursos = [];
@@ -121,20 +121,20 @@ class Horarios extends Component
             return;
         }
 
-    
+
         $this->cursos = DocenteCurso::with('curso')
             ->where('semestre_id', $semestreVigente->id)
             ->whereHas('curso', function ($q) use ($value) {
                 $q->where('carrera_id', $value);
             })
-            ->select('curso_id')          
-            ->distinct()                  
+            ->select('curso_id')
+            ->distinct()
             ->get()
             ->map(function ($dc) {
-                return $dc->curso;      
+                return $dc->curso;
             })
-            ->sortBy('nombre')            
-            ->values();                 
+            ->sortBy('nombre')
+            ->values();
     }
 
 
@@ -149,7 +149,7 @@ class Horarios extends Component
 
         $semestreVigente = $this->obtenerSemestreVigente();
 
-        
+
         $this->grupos = DocenteCurso::with('grupo')
             ->where('curso_id', $cursoSeleccionado)
             ->where('semestre_id', $semestreVigente->id)
@@ -209,14 +209,14 @@ class Horarios extends Component
 
     private function validarCruceHorarios()
     {
-       
+
         if (!$this->hora_inicio || !$this->hora_fin) {
             return;
         }
         $cruce = HorarioCursoDocente::where('horario_id', $this->horario_id)
             ->where('semana_id', $this->semana_id)
             ->when($this->asignacion_id, function ($q) {
-                $q->where('id', '!=', $this->asignacion_id); 
+                $q->where('id', '!=', $this->asignacion_id);
             })
             ->where(function ($q) {
                 $q->whereBetween('hora_inicio', [$this->hora_inicio, $this->hora_fin])
@@ -244,7 +244,7 @@ class Horarios extends Component
             $this->validateOnly($campo);
             return;
         }
-        
+
         $this->validateOnly($campo);
     }
     public function generarNombreHorario()
@@ -288,12 +288,12 @@ class Horarios extends Component
         try {
             HorarioCursoDocente::create([
                 'horario_id' => $this->horario_id,
-                'docente_curso_id' => $this->grupo_id, 
+                'docente_curso_id' => $this->grupo_id,
                 'semana_id' => $this->semana_id,
                 'hora_inicio' => $this->hora_inicio,
                 'hora_fin' => $this->hora_fin
             ]);
-            
+
             $this->actualizarHorario();
 
             $this->limpiar();
@@ -315,7 +315,7 @@ class Horarios extends Component
 
             $asignacion->update([
                 'horario_id'        => $this->horario_id,
-                'docente_curso_id'  => $this->grupo_id,   
+                'docente_curso_id'  => $this->grupo_id,
                 'semana_id'         => $this->semana_id,
                 'hora_inicio'       => $this->hora_inicio,
                 'hora_fin'          => $this->hora_fin,
@@ -358,29 +358,35 @@ class Horarios extends Component
     public function render()
     {
         $fechaActual = now();
+
         $semestreVigente = Semestre::where('fecha_inicio', '<=', $fechaActual)
-            ->where('fecha_fin', '>=', $fechaActual)->first();
-        $horarios = collect();
-        if ($semestreVigente) {
-            $horarios = Horario::where('semestre_id', $semestreVigente->id)->get();
-        }
+            ->where('fecha_fin', '>=', $fechaActual)
+            ->first();
+
+        $sinSemestreVigente = $semestreVigente === null;
+
+        // ✅ Horarios solo si hay vigente
+        $horarios = $sinSemestreVigente
+            ? collect()
+            : Horario::where('semestre_id', $semestreVigente->id)->get();
 
         $laboratorios = Laboratorio::get();
 
+        // OJO: esto te devuelve SOLO vigentes, está bien si eso quieres
         $semestres = Semestre::where('fecha_inicio', '<=', $fechaActual)
-            ->where('fecha_fin', '>=', $fechaActual)->get();
+            ->where('fecha_fin', '>=', $fechaActual)
+            ->get();
 
         $facultades = catalogo::where('padre_id', 4)->get();
         $dias = catalogo::where('padre_id', 3)->get();
         $carreras = Carrera::get();
 
-
-        $cursos = DocenteCurso::with('curso')
+        // ✅ Cursos solo si hay vigente (aquí estaba tu error)
+        $cursos = $sinSemestreVigente
+            ? collect()
+            : DocenteCurso::with('curso')
             ->where('semestre_id', $semestreVigente->id)
             ->get();
-
-
-
 
         return view('livewire.horarios.horarios', [
             'laboratorios' => $laboratorios,
@@ -390,7 +396,11 @@ class Horarios extends Component
             'dias' => $dias,
             'carreras' => $carreras,
             'cursos' => $cursos,
-            'cursosPorDia' => $this->cursosPorDia
+            'cursosPorDia' => $this->cursosPorDia,
+
+            // ✅ para mostrar aviso y/o deshabilitar botones en el blade
+            'semestreVigente' => $semestreVigente,
+            'sinSemestreVigente' => $sinSemestreVigente,
         ]);
     }
 }

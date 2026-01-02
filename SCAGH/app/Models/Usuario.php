@@ -24,6 +24,12 @@ class Usuario extends Authenticatable implements CanResetPasswordContract
         'usuario_cr',
         'fecha_md',
         'usuario_md',
+        'must_change_password',
+        'password_changed_at',
+    ];
+    protected $casts = [
+        'must_change_password' => 'boolean',
+        'password_changed_at' => 'datetime',
     ];
     protected $hidden = [
         'password',
@@ -32,7 +38,6 @@ class Usuario extends Authenticatable implements CanResetPasswordContract
 
     public $timestamps = false;
 
-    // Auditoría automática
     protected static function boot()
     {
         parent::boot();
@@ -67,8 +72,6 @@ class Usuario extends Authenticatable implements CanResetPasswordContract
         )->wherePivot('estado', 1);
     }
 
-    // IMPORTANTE: tu correo está en persona, así que lo devolvemos desde ahí
-
 
     public function getEmailForPasswordReset()
     {
@@ -100,10 +103,8 @@ class Usuario extends Authenticatable implements CanResetPasswordContract
                 fn($q) =>
                 $q->where(function ($sub) use ($valor) {
 
-                    // 🔎 Buscar por USERNAME
                     $sub->where('username', 'like', "%{$valor}%")
 
-                        // 🔎 Buscar por PERSONA
                         ->orWhereHas('persona', function ($p) use ($valor) {
                             $p->where('nombre', 'like', "%{$valor}%")
                                 ->orWhere('apellido_paterno', 'like', "%{$valor}%")

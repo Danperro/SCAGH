@@ -7,6 +7,8 @@ use App\Models\Docente;
 use App\Models\Persona;
 use App\Models\Rol;
 use App\Models\Usuario;
+use App\Models\UsuarioRol;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -22,7 +24,7 @@ class Usuarios extends Component
     public $usuario_id, $username, $password, $password_confirmation, $rolesSeleccionados = [], $estado, $email;
     public $persona_id, $nombre, $apellido_paterno, $apellido_materno, $dni, $telefono, $correo, $fecha_nacimiento;
     public $especialidad_id;
-    
+    public $rolesUsuario = [];
     #[Url('Busqueda')]
 
 
@@ -47,14 +49,18 @@ class Usuarios extends Component
         $this->fecha_nacimiento  = $usuario->persona->fecha_nacimiento;
 
         $this->username          = $usuario->username;
-        $this->rolesSeleccionados = $usuario->roles->pluck('id')->toArray();
         $this->estado            = $usuario->estado;
         $this->email = $usuario->email;
         $this->password = null;
         $this->password_confirmation = null;
 
-        $docente = Docente::where('persona_id', $this->persona_id)->first();
+        // Cargar solo los IDs de los roles ACTIVOS (estado = 1)
+        $this->rolesSeleccionados = $usuario->roles()
+            ->wherePivot('estado', 1)
+            ->pluck('rol.id')
+            ->toArray();
 
+        $docente = Docente::where('persona_id', $this->persona_id)->first();
         $this->especialidad_id = $docente ? $docente->especialidad_id : null;
     }
 
@@ -124,7 +130,6 @@ class Usuarios extends Component
             'username' => 'required|min:4|max:30|unique:usuario,username,' . $this->usuario_id,
             'password' => 'required|min:6|same:password_confirmation',
             'password_confirmation' => 'required|min:6',
-
         ];
     }
 
@@ -285,15 +290,42 @@ class Usuarios extends Component
                 'fecha_nacimiento' => $this->fecha_nacimiento,
             ]);
 
-
             $usuario->update([
                 'username' => $this->username,
                 'email'    => $this->email,
                 'estado'   => $this->estado,
+
             ]);
 
-            $usuario->roles()->sync($this->rolesSeleccionados);
+            $rolesActuales = UsuarioRol::where('usuario_id', $this->usuario_id)
+                ->pluck('rol_id')
+                ->toArray();
 
+            $rolesADesactivar = array_diff($rolesActuales, $this->rolesSeleccionados);
+
+            // 🔴 Desactivar solo los que se apagaron
+            if (!empty($rolesADesactivar)) {
+                UsuarioRol::where('usuario_id', $this->usuario_id)
+                    ->whereIn('rol_id', $rolesADesactivar)
+                    ->update(['estado' => 0]);
+            }
+
+            // 🟢 Activar / crear los seleccionados
+            foreach ($this->rolesSeleccionados as $rolId) {
+                UsuarioRol::updateOrCreate(
+                    [
+                        'usuario_id' => $this->usuario_id,
+                        'rol_id'     => $rolId,
+                    ],
+                    [
+                        'estado' => 1,
+                    ]
+                );
+            }
+
+
+
+            // Actualizar contraseña solo si se ingresó una nueva
             if (!empty($this->password)) {
                 $usuario->update([
                     'password' => Hash::make($this->password),
@@ -335,7 +367,25 @@ class Usuarios extends Component
             ->orderBy('id', 'desc')
             ->paginate(10);
         $especialidades = Catalogo::where('padre_id', 26)->get();
-        $roles = Rol::get();
+        $usuarioId = $this->usuario_id;
+
+        // 1️⃣ IDs de roles que existen para el usuario
+        $rolesIds = UsuarioRol::query()
+            ->where('usuario_id', $usuarioId)
+            ->pluck('rol_id')
+            ->toArray();
+
+        // 2️⃣ Forzar ADMINISTRADOR (id = 1)
+        $rolesIds = array_unique(array_merge([1], $rolesIds));
+
+        // 3️⃣ Traer los ROLES reales
+        $roles = Rol::query()
+            ->whereIn('id', $rolesIds)
+            ->orderByRaw("CASE WHEN id = 1 THEN 0 ELSE 1 END")
+            ->orderBy('nombre')
+            ->get();
+
+
         return view('livewire.usuarios.usuarios', [
             'usuarios' => $usuarios,
             'roles' => $roles,

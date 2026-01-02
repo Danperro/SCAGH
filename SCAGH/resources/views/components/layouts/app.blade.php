@@ -348,61 +348,71 @@
                 <div class="flex-grow-1">
                     <ul class="nav nav-pills flex-column px-3" id="sidebarAccordion">
 
-                        <!-- SOLO ACTIVAMOS ESTE MÓDULO -->
-                        <li class="nav-item">
-                            <a href="/Carreras" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-mortarboard"></i> Gestión de Carreras
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/Cursos" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-journal-bookmark"></i> Gestión de Cursos
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/Semestres" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-journal-bookmark"></i> Gestión de Semestres
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/Horarios" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-calendar-week"></i> Gestión de Horarios
-                            </a>
-                        </li>
+                        {{-- SOLO ADMIN (rol 1) --}}
+                        @role(1)
+                            <li class="nav-item">
+                                <a href="/Carreras" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-mortarboard"></i> Gestión de Carreras
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a href="/Docentes" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-person-badge"></i> Gestión de Docentes
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a href="/Cursos" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-journal-bookmark"></i> Gestión de Cursos
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a href="/Estudiantes" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-people"></i> Gestión de Estudiantes
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a href="/Semestres" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-journal-bookmark"></i> Gestión de Semestres
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a href="/Asistencias" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-clipboard-check"></i> Realizar Asistencia
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a href="/Docentes" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-person-badge"></i> Gestión de Docentes
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a href="/Reportes" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-file-earmark-bar-graph"></i> Gestión de Reportes
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a href="/Estudiantes" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-people"></i> Gestión de Estudiantes
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a href="/Usuarios" class="nav-link text-white d-flex align-items-center gap-2">
-                                <i class="bi bi-people-fill"></i> Gestión de Usuarios
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a href="/Usuarios" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-people-fill"></i> Gestión de Usuarios
+                                </a>
+                            </li>
+                        @endrole
 
+                        {{-- TODOS (admin, docente, estudiante) --}}
+                        @role(1, 2, 3)
+                            <li class="nav-item">
+                                <a href="/Horarios" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-calendar-week"></i> Gestión de Horarios
+                                </a>
+                            </li>
+                        @endrole
 
+                        {{-- ADMIN + DOCENTE (rol 1 y 2) --}}
+                        @role(1, 2)
+                            <li class="nav-item">
+                                <a href="/Asistencias" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-clipboard-check"></i> Realizar Asistencia
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="/Reportes" class="nav-link text-white d-flex align-items-center gap-2">
+                                    <i class="bi bi-file-earmark-bar-graph"></i> Gestión de Reportes
+                                </a>
+                            </li>
+                        @endrole
 
                     </ul>
+
                 </div>
 
                 <!-- User -->

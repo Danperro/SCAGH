@@ -10,6 +10,10 @@ use App\Models\Estudiante;
 use App\Models\EstudianteCursoDocente;
 use App\Models\Persona;
 use App\Models\Semestre;
+use App\Models\Usuario;
+use App\Models\UsuarioRol;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Url;
@@ -63,7 +67,47 @@ class Estudiantes extends Component
         $this->semestre_id = $semestreVigente ? $semestreVigente->id : null;
     }
 
+    public function updatedDni($value)
+    {
+        // Solo para CREAR (si estás editando, no autocompletes)
+        if ($this->estudiante_id) return;
 
+        $this->resetErrorBag('dni');
+
+        // Sanitizar: solo números
+        $dni = preg_replace('/\D/', '', (string) $value);
+
+        // Espera a 8 dígitos
+        if (strlen($dni) !== 8) {
+            $this->persona_id = null;
+            return;
+        }
+
+        $persona = Persona::where('dni', $dni)->first();
+
+        // Si no existe persona, no llenes nada
+        if (!$persona) {
+            $this->persona_id = null;
+            return;
+        }
+
+        // Si esa persona ya es estudiante, marca error (y no llenes)
+        $yaEsEstudiante = Estudiante::where('persona_id', $persona->id)->exists();
+        if ($yaEsEstudiante) {
+            $this->addError('dni', 'Este DNI ya está registrado como estudiante.');
+            $this->persona_id = null;
+            return;
+        }
+
+        // Autocompletar (NO reasignes $this->dni para evitar bucles)
+        $this->persona_id       = $persona->id;
+        $this->nombre           = $persona->nombre;
+        $this->apellido_paterno = $persona->apellido_paterno;
+        $this->apellido_materno = $persona->apellido_materno;
+        $this->telefono         = $persona->telefono;
+        $this->correo           = $persona->correo;
+        $this->fecha_nacimiento = $persona->fecha_nacimiento;
+    }
     public function selectAsignacionCurso($id)
     {
         $this->estudiante_curso_docente_id = $id;
@@ -87,7 +131,20 @@ class Estudiantes extends Component
             'apellido_paterno' => 'required|regex:/^[\pL\s]+$/u|min:2|max:50',
             'apellido_materno' => 'required|regex:/^[\pL\s]+$/u|min:2|max:50',
 
-            'dni' => 'required|digits:8|regex:/^[0-9]+$/|unique:persona,dni,' . $this->persona_id,
+            'dni' => [
+                'required',
+                'digits:8',
+                'regex:/^[0-9]+$/',
+                Rule::unique('persona', 'dni')
+                    ->ignore($this->persona_id) // EXCEPTO la misma persona que editas
+                    ->where(function ($q) {
+                        $q->whereExists(function ($sub) {
+                            $sub->select(DB::raw(1))
+                                ->from('estudiante')
+                                ->whereColumn('estudiante.persona_id', 'persona.id');
+                        });
+                    }),
+            ],
 
             'telefono' => [
                 'required',
@@ -334,6 +391,18 @@ class Estudiantes extends Component
                 'persona_id' => $persona->id,
                 'codigo' => $this->codigo,
                 'carrera_id' => $this->carrera_id,
+            ]);
+            $usuario = Usuario::create([
+                'persona_id' => $persona->id,
+                'username' => $this->codigo,
+                'password' => Hash::make($persona->dni),
+                'email' => $persona->correo,
+                'must_change_password' => true,     // ✅ FORZAR CAMBIO
+                'password_changed_at' => null,
+            ]);
+            UsuarioRol::create([
+                'usuario_id' => $usuario->id,
+                'rol_id' => 3
             ]);
             $this->limpiar();
             $this->dispatch('cerrarModal');

@@ -70,6 +70,7 @@
                     <thead class="table-light">
                         <tr class="text-center">
                             <th class="text-start ps-4">Docente</th>
+                            <th scope="col">Dni</th>
                             <th scope="col">Especialidad</th>
                             <th scope="col">Estado</th>
                             <th scope="col">Acciones</th>
@@ -83,6 +84,7 @@
                                         {{ $docente->persona->nombre . ' ' . $docente->persona->apellido_paterno . ' ' . $docente->persona->apellido_materno }}
                                     </div>
                                 </td>
+                                <td class="text-center">{{ $docente->persona->dni }}</td>
                                 <td class="text-center">{{ $docente->especialidad->nombre }}</td>
                                 <td class="text-center">
                                     <span class="badge {{ $docente->estado ? 'bg-success' : 'bg-danger' }}"

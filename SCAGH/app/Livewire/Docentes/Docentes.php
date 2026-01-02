@@ -10,8 +10,12 @@ use App\Models\Persona;
 use App\Models\Semestre;
 use App\Models\DocenteCurso;
 use App\Models\Usuario;
+use App\Models\UsuarioRol;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 
@@ -72,7 +76,21 @@ class Docentes extends Component
             'apellido_paterno' => 'required|regex:/^[\pL\s]+$/u|min:2|max:50',
             'apellido_materno' => 'required|regex:/^[\pL\s]+$/u|min:2|max:50',
 
-            'dni' => 'required|digits:8|numeric|unique:persona,dni,' . $this->persona_id,
+
+            'dni' => [
+                'required',
+                'digits:8',
+                'regex:/^[0-9]+$/',
+                Rule::unique('persona', 'dni')
+                    ->ignore($this->persona_id) // EXCEPTO la misma persona que editas
+                    ->where(function ($q) {
+                        $q->whereExists(function ($sub) {
+                            $sub->select(DB::raw(1))
+                                ->from('docente')
+                                ->whereColumn('docente.persona_id', 'persona.id');
+                        });
+                    }),
+            ],
 
             'telefono' => [
                 'required',
@@ -221,6 +239,18 @@ class Docentes extends Component
             docente::create([
                 'persona_id' => $persona->id,
                 'especialidad_id' => $this->especialidad_id,
+            ]);
+            $usuario = Usuario::create([
+                'persona_id' => $persona->id,
+                'username' => $persona->dni,
+                'password' => Hash::make($persona->dni),
+                'email' => $persona->correo,
+                'must_change_password' => true,     // ✅ FORZAR CAMBIO
+                'password_changed_at' => null,
+            ]);
+            UsuarioRol::create([
+                'usuario_id' => $usuario->id,
+                'rol_id' => 2
             ]);
             $this->limpiar();
             $this->dispatch('cerrarModal');

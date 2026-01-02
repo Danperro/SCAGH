@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ForcePasswordChange;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -14,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'role'  => RoleMiddleware::class,
-
+            'force_password_change' => ForcePasswordChange::class, // ✅ aquí
             // si también te marca auth/guest como not found, regístralos así:
             'auth'  => \Illuminate\Auth\Middleware\Authenticate::class,
             'guest' => \Illuminate\Auth\Middleware\RedirectIfAuthenticated::class,

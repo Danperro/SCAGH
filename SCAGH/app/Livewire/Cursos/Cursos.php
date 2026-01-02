@@ -27,20 +27,23 @@ class Cursos extends Component
     // =========================
     private function ciclosPermitidos(?int $carreraId)
     {
-        $base = Catalogo::where('padre_id', 13)->orderBy('id');
+        $padre = Catalogo::where('nombre', 'CICLO')->first();
 
-        // Si no hay carrera, muestra todos
+        if (!$padre) {
+            return collect();
+        }
+
+        $base = Catalogo::where('padre_id', $padre->id)->orderBy('id');
+
         if (empty($carreraId)) {
             return $base->get();
         }
 
-        // Si aún no migras, no rompas: muestra todos
         if (!Schema::hasColumn('carrera', 'ciclos_total')) {
             return $base->get();
         }
 
-        $max = Carrera::whereKey($carreraId)->value('ciclos_total');
-        $max = (int)($max ?: 12);
+        $max = Carrera::whereKey($carreraId)->value('ciclos_total') ?? 12;
 
         return $base->take($max)->get();
     }

@@ -35,4 +35,7 @@ class UsuarioRol extends Pivot
             $model->usuario_md = Auth::id();
         });
     }
+
+ 
+ 
 }
