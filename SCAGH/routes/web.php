@@ -4,6 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReporteAsistenciaController;
 
+
+Route::get('/gd-check', function () {
+    return extension_loaded('gd') ? 'GD OK' : 'GD NO';
+});
+
 use App\Livewire\Horarios\Horarios;
 use App\Livewire\Semestres\Semestres;
 use App\Livewire\Cursos\Cursos;
