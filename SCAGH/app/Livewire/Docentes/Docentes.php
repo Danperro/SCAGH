@@ -103,12 +103,7 @@ class Docentes extends Component
                 'regex:/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(com|pe|edu|es)$/',
                 'unique:persona,correo,' . $this->persona_id,
             ],
-            'email' => [
-                'required',
-                'email',
-                'regex:/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.(com|pe|edu|es)$/',
-                'unique:usuario,email,' . $this->usuario_id,
-            ],
+
             'fecha_nacimiento' => [
                 'required',
                 'date',
@@ -120,7 +115,47 @@ class Docentes extends Component
         ];
     }
 
+    public function updatedDni($value)
+    {
+        // Solo para CREAR (si estás editando, no autocompletes)
+        if ($this->docente_id) return;
 
+        $this->resetErrorBag('dni');
+
+        // Sanitizar: solo números
+        $dni = preg_replace('/\D/', '', (string) $value);
+
+        // Espera a 8 dígitos
+        if (strlen($dni) !== 8) {
+            $this->persona_id = null;
+            return;
+        }
+
+        $persona = Persona::where('dni', $dni)->first();
+
+        // Si no existe persona, no llenes nada
+        if (!$persona) {
+            $this->persona_id = null;
+            return;
+        }
+
+        // Si esa persona ya es Docente, marca error (y no llenes)
+        $yaEsDocente = Docente::where('persona_id', $persona->id)->exists();
+        if ($yaEsDocente) {
+            $this->addError('dni', 'Este DNI ya está registrado como Docente.');
+            $this->persona_id = null;
+            return;
+        }
+
+        // Autocompletar (NO reasignes $this->dni para evitar bucles)
+        $this->persona_id       = $persona->id;
+        $this->nombre           = $persona->nombre;
+        $this->apellido_paterno = $persona->apellido_paterno;
+        $this->apellido_materno = $persona->apellido_materno;
+        $this->telefono         = $persona->telefono;
+        $this->correo           = $persona->correo;
+        $this->fecha_nacimiento = $persona->fecha_nacimiento;
+    }
     protected function rulesAsignacionCurso()
     {
         return [

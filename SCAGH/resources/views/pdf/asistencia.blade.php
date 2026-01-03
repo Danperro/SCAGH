@@ -137,8 +137,10 @@
     <div class="encabezado">
         <div class="titulo">
             <h1>REPORTE DE ASISTENCIA</h1>
-            <h3>Registro de asistencia de estudiantes</h3>
+            <h3>Registro de asistencia de estudiantes por el uso de los laboratorios</h3>
+
         </div>
+
 
         {{-- Si no tienes logo, borra este bloque --}}
         <div class="logo">
@@ -149,8 +151,15 @@
 
     {{-- DATOS GENERALES (en cuadro) --}}
     <div class="fila-datos">
-       
+
+
         <div class="col">
+            <p><strong>Carrera:</strong>
+                {{ $asistencia->horarioCursoDocente->docenteCurso->curso->carrera->nombre }}
+            </p>
+            <p><strong>Facultad:</strong>
+                {{ $asistencia->horarioCursoDocente->docenteCurso->curso->carrera->facultad->nombre }}
+            </p>
 
             <p><strong>Asignatura:</strong>
                 {{ $asistencia->horarioCursoDocente->docenteCurso->curso->nombre }}

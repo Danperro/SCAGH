@@ -153,6 +153,25 @@ class Cursos extends Component
             'codigo' => ['required', 'min:3'],
         ];
     }
+    protected function messages()
+    {
+        return [
+            'facultad_id.required' => 'Selecciona una facultad.',
+            'facultad_id.integer'  => 'La facultad seleccionada no es válida.',
+
+            'carrera_id.required'  => 'Selecciona una carrera.',
+            'carrera_id.integer'   => 'La carrera seleccionada no es válida.',
+
+            'ciclo_id.required'    => 'Selecciona un ciclo.',
+            'ciclo_id.integer'     => 'El ciclo seleccionado no es válido.',
+
+            'nombre.required'      => 'El nombre es obligatorio.',
+            'nombre.min'           => 'El nombre debe tener al menos :min caracteres.',
+
+            'codigo.required'      => 'El código es obligatorio.',
+            'codigo.min'           => 'El código debe tener al menos :min caracteres.',
+        ];
+    }
 
     public function updated($campo)
     {
@@ -164,8 +183,8 @@ class Cursos extends Component
     // =========================
     public function CrearCurso()
     {
+        $this->validate();
         try {
-            $this->validate();
 
             Curso::create([
                 'carrera_id' => $this->carrera_id,
@@ -177,16 +196,17 @@ class Cursos extends Component
 
             $this->limpiar();
             $this->dispatch('cerrarModal');
-            $this->dispatch('toast-exito', 'Curso registrado correctamente');
+            $this->dispatch('toast-general', mensaje: 'Curso creado correctamente.', tipo: 'success');
         } catch (\Throwable $e) {
             Log::error("Error al crear el curso: " . $e->getMessage());
+            $this->dispatch('toast-general', mensaje: 'Error al registrar carrera.', tipo: 'danger');
         }
     }
 
     public function EditarCurso()
     {
+        $this->validate();
         try {
-            $this->validate();
 
             Curso::findOrFail($this->curso_id)->update([
                 'carrera_id' => $this->carrera_id,
@@ -198,9 +218,10 @@ class Cursos extends Component
 
             $this->limpiar();
             $this->dispatch('cerrarModal');
-            $this->dispatch('toast-exito', 'Curso editado correctamente');
+            $this->dispatch('toast-general', mensaje: 'Curso editado correctamente.', tipo: 'success');
         } catch (\Throwable $e) {
             Log::error("Error al editar el curso: " . $e->getMessage());
+            $this->dispatch('toast-general', mensaje: 'Error al registrar carrera.', tipo: 'danger');
         }
     }
 
@@ -214,7 +235,7 @@ class Cursos extends Component
 
             $this->limpiar();
             $this->dispatch('cerrarModal');
-            $this->dispatch('toast-general', mensaje: 'urso al Eliminado correctamente.', tipo: 'success');
+            $this->dispatch('toast-general', mensaje: 'curso al Eliminado correctamente.', tipo: 'success');
         } catch (\Throwable $e) {
             Log::error("Error al eliminar el curso: " . $e->getMessage());
             $this->dispatch('toast-general', mensaje: 'Ocurrió un error al eliminar el Curso.', tipo: 'danger');

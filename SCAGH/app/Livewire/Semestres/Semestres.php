@@ -75,9 +75,8 @@ class Semestres extends Component
 
     public function CrearSemestre()
     {
+        $this->validate();
         try {
-            $this->validate();
-
             Semestre::create([
                 'nombre'       => strtoupper($this->nombre),
                 'fecha_inicio' => $this->fecha_inicio,
@@ -96,9 +95,8 @@ class Semestres extends Component
 
     public function EditarSemestre()
     {
+        $this->validate();
         try {
-            $this->validate();
-
             Semestre::findOrFail($this->semestre_id)->update([
                 'nombre'       => strtoupper($this->nombre),
                 'fecha_inicio' => $this->fecha_inicio,
@@ -107,7 +105,7 @@ class Semestres extends Component
 
             $this->limpiar();
             $this->dispatch('cerrarModal');
-            $this->dispatch('toast-general', mensaje: 'Semestre registrado correctamente.', tipo: 'success');
+            $this->dispatch('toast-general', mensaje: 'Semestre editado correctamente.', tipo: 'success');
         } catch (\Throwable $e) {
             Log::error('Error al editar semestre: ' . $e->getMessage());
             $this->dispatch('toast-general', mensaje: 'Semestre no se pudo editar correctamente.', tipo: 'danger');

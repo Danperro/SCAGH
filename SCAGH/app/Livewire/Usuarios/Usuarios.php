@@ -385,11 +385,12 @@ class Usuarios extends Component
             ->orderBy('nombre')
             ->get();
 
-
+        $rolesfiltro=Rol::get();
         return view('livewire.usuarios.usuarios', [
             'usuarios' => $usuarios,
             'roles' => $roles,
             'especialidades' => $especialidades,
+            'rolesfiltro'=> $rolesfiltro,
         ]);
     }
 }

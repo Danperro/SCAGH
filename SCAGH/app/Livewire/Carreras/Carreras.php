@@ -80,6 +80,26 @@ class Carreras extends Component
             'estado' => ['required', 'boolean'],
         ];
     }
+    protected function messages()
+    {
+        return [
+            'facultadId.required' => 'Selecciona una facultad.',
+            'facultadId.integer'  => 'La facultad seleccionada no es válida.',
+            'facultadId.exists'   => 'La facultad seleccionada no existe.',
+
+            'nombre.required' => 'El nombre de la carrera es obligatorio.',
+            'nombre.min'      => 'El nombre debe tener al menos :min caracteres.',
+            'nombre.max'      => 'El nombre no puede exceder :max caracteres.',
+            'nombre.unique'   => 'Ya existe una carrera con ese nombre.',
+
+            'ciclosTotal.required' => 'Selecciona el total de ciclos.',
+            'ciclosTotal.integer'  => 'El total de ciclos no es válido.',
+            'ciclosTotal.in'       => 'El total de ciclos permitido es 10, 12 o 14.',
+
+            'estado.required' => 'El estado es obligatorio.',
+            'estado.boolean'  => 'El estado no es válido.',
+        ];
+    }
 
     public function updated($campo)
     {
@@ -88,8 +108,9 @@ class Carreras extends Component
 
     public function CrearCarrera()
     {
+        $this->validate();
         try {
-            $this->validate();
+
             Carrera::create([
                 'facultad_id'  => $this->facultadId,
                 'nombre'       => strtoupper(trim($this->nombre)),
@@ -106,8 +127,9 @@ class Carreras extends Component
 
     public function EditarCarrera()
     {
+        $this->validate();
         try {
-            $this->validate();
+
             Carrera::FindOrFail($this->carreraId)->update([
                 'facultad_id'  => $this->facultadId,
                 'nombre'       => strtoupper(trim($this->nombre)),
@@ -139,9 +161,8 @@ class Carreras extends Component
     public function render()
     {
         $facultades = Catalogo::where('padre_id', 4)->get();
-        $carreras = Carrera::search
-        ($this->query, $this->filtrofacultadId, $this->filtroestado)
-        ->orderBy('id', 'desc')->paginate(10);
+        $carreras = Carrera::search($this->query, $this->filtrofacultadId, $this->filtroestado)
+            ->orderBy('id', 'desc')->paginate(10);
         return view('livewire.carreras.carreras', [
             'facultades' => $facultades,
             'carreras' => $carreras,
