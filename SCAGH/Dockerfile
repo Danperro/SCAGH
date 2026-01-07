@@ -30,7 +30,7 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm install --production
 
 # Compilar los assets de Laravel (incluyendo Livewire)
-RUN npm run prod
+RUN npm run build   # Usamos "npm run build" en lugar de "npm run prod"
 
 # Publicar los assets de Livewire
 RUN php artisan livewire:publish --assets
