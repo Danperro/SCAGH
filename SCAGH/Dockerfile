@@ -26,8 +26,8 @@ RUN mkdir -p storage bootstrap/cache \
 # Instalar dependencias PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Instalar dependencias de npm
-RUN npm install --production
+# Instalar dependencias de npm (sin el flag --production para incluir las dependencias de desarrollo)
+RUN npm install
 
 # Compilar los assets de Laravel (incluyendo Livewire)
 RUN npm run build   # Usamos "npm run build" en lugar de "npm run prod"
