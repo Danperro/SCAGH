@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql
 
+# Instalar Node.js y npm
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs
+
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -21,6 +25,24 @@ RUN mkdir -p storage bootstrap/cache \
 
 # Instalar dependencias PHP
 RUN composer install --no-dev --optimize-autoloader
+
+# Instalar dependencias de npm
+RUN npm install --production
+
+# Compilar los assets de Laravel (incluyendo Livewire)
+RUN npm run prod
+
+# Publicar los assets de Livewire
+RUN php artisan livewire:publish --assets
+
+# Optimizar la aplicación Laravel
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
+RUN php artisan optimize
+
+# Ejecutar migraciones en producción (si es necesario)
+RUN php artisan migrate --force
 
 # Puerto Railway
 EXPOSE 8080

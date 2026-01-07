@@ -283,6 +283,7 @@ class Horarios extends Component
 
     public function AsignarCurso()
     {
+        $this->validate($this->rulesAsignacionCurso());
         $this->validarCruceHorarios();
 
         try {
